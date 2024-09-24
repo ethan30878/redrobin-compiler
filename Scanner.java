@@ -67,7 +67,7 @@ class Scanner {
             if (symDictionary.get(nextToken) != null) {
 
                 // Print token name
-                System.out.println(symDictionary.get(nextToken));
+                System.out.println(symDictionary.get(nextToken) + ": " + nextToken);
 
                 continue;
 
@@ -75,18 +75,18 @@ class Scanner {
 
             // Check if token is an identifier
             if (nextToken.matches("[a-z][a-zA-Z0-9_]*")) {
-                System.out.println("IDENTIFIER");
+                System.out.println("IDENTIFIER" + ": " + nextToken);
                 continue;
             }
 
             // Check if token is an number
             if (nextToken.matches("[0-9]*")) {
-                System.out.println("NUMBER");
+                System.out.println("NUMBER" + ": " + nextToken);
                 continue;
             }
 
             // Print invalid token
-            System.out.println("INVALID_TOKEN");
+            System.out.println("INVALID_TOKEN" + ": " + nextToken);
 
         }
     }
