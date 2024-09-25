@@ -56,7 +56,7 @@ class Scanner {
         String input = System.console().readLine();
 
         // Tokenize input
-        StringTokenizer tokenizedString = new StringTokenizer(input);
+        StringTokenizer tokenizedString = new StringTokenizer(input, " \t\n\r\f+-*/%()[]{};,<>=!&|^~", true);
 
         // Iterate through tokens
         while (tokenizedString.hasMoreTokens()) {
@@ -83,6 +83,11 @@ class Scanner {
             // Check if token is an number
             if (nextToken.matches("[0-9]*")) {
                 System.out.println("NUMBER" + ": " + nextToken);
+                continue;
+            }
+
+            // Ignore whitespace
+            if (nextToken.matches("[ \t\n\r\f]+")) {
                 continue;
             }
 
