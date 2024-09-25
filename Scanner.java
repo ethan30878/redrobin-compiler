@@ -46,6 +46,8 @@ class Scanner {
         symDictionary.put("mut", "MUT_KEYWORD");
         symDictionary.put("i32", "i32_KEYWORD");
         symDictionary.put("f32", "f32_KEYWORD");
+        symDictionary.put("i64", "i64_KEYWORD");
+        symDictionary.put("f64", "f64_KEYWORD");
 
         // Printing read in statement
         System.out.println("Enter a statement: ");
