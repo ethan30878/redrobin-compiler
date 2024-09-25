@@ -56,7 +56,7 @@ class Scanner {
         String input = System.console().readLine();
 
         // Tokenize input
-        StringTokenizer tokenizedString = new StringTokenizer(input, " \t\n\r\f+-*/%()[]{};,<>=!&|^~", true);
+        StringTokenizer tokenizedString = new StringTokenizer(input, " \t\n\r\f+-*/%()[]{};,&|^~", true);
 
         // Iterate through tokens
         while (tokenizedString.hasMoreTokens()) {
