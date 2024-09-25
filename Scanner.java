@@ -17,7 +17,7 @@ class Scanner {
         symDictionary.put(")", "RIGHT_PARANTHESIS");
         symDictionary.put("(", "LEFT_PARANTHESIS");
         symDictionary.put("\"", "QUOTATION_MARK");
-        symDictionary.put("'", "ASPOSTROPHE");
+        symDictionary.put("'", "APOSTROPHE");
         symDictionary.put(";", "SEMICOLON");
         symDictionary.put(":", "COLON");
 
