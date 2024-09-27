@@ -59,7 +59,8 @@ class Scanner {
                 symDictionary.put("8", 49);
                 symDictionary.put("9", 50);
                 symDictionary.put("0", 51);
-                symDictionary.put(" ", 52);
+                symDictionary.put(".", 52);
+                symDictionary.put(" ", 53);
 
                 // Final State Dictionary
                 // GENERAL SYMBOLS
@@ -354,7 +355,7 @@ class Scanner {
                                 //from state 37
                                 { 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                                 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
-                                99, 99, 99, 99, 99, 99, 99, 99, 38, 99,
+                                99, 99, 99, 99, 99, 99, 99, 99, 99, 38,
                                 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                                 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                                 99, 99, 99 },
@@ -473,15 +474,24 @@ class Scanner {
                 @SuppressWarnings("unused")
                 int lastInput = 0;
 
-                input = input.replaceAll("\\s", "");
+                //input = input.replaceAll("\\s", "");
 
                 // Scanner Loop
                 for (int i = 0; i < input.length(); i++) {
 
                         currentChar = String.valueOf(input.charAt(i));
-
+                        
                         int columnIndex = symDictionary.get(currentChar);
-
+                        if (columnIndex == 53) {  // Space encountered, reset that bad boy
+                                if (bookmark != i) {
+                                    String token = input.substring(bookmark, i); 
+                                    System.out.println(finalStates.get(token) + ": " + token);
+                                }
+                                bookmark = i + 1;  
+                                currentState = 0; 
+                                System.out.println();
+                                continue;
+                            }
                         lastInput = columnIndex;
 
                         // Reference transition table
