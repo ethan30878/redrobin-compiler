@@ -64,12 +64,45 @@ class Scanner {
                 symDictionary.put(" ", 52);
 
                 // Final State Dictionary
+
+                finalStates.put(4, "IDENTIFIER");
+                finalStates.put(46, "IDENTIFIER");
+                finalStates.put(1, "IDENTIFIER");
+
+                finalStates.put(6, "IDENTIFIER");
+                finalStates.put(7, "IDENTIFIER");
+                finalStates.put(8, "IDENTIFIER");
+
+                finalStates.put(12, "IDENTIFIER");
+                finalStates.put(13, "IDENTIFIER");
+                finalStates.put(48, "IDENTIFIER");
+                finalStates.put(10, "IDENTIFIER");
+                finalStates.put(50, "IDENTIFIER");
+                finalStates.put(51, "IDENTIFIER");
+                finalStates.put(52, "IDENTIFIER");
+
+                finalStates.put(15, "IDENTIFIER");
+                finalStates.put(16, "IDENTIFIER");
+                finalStates.put(17, "IDENTIFIER");
+                finalStates.put(18, "IDENTIFIER");
+
+                finalStates.put(20, "IDENTIFIER");
+                finalStates.put(21, "IDENTIFIER");
+
+                finalStates.put(23, "IDENTIFIER");
+                finalStates.put(24, "IDENTIFIER");
+
+                finalStates.put(54, "IDENTIFIER");
+                finalStates.put(55, "IDENTIFIER");
+                finalStates.put(56, "IDENTIFIER");
+
                 // GENERAL SYMBOLS
                 finalStates.put(26, "RIGHT_CURLY_BRACKET");
                 finalStates.put(27, "LEFT_CURLY_BRACKET");
                 finalStates.put(28, "RIGHT_PARANTHESIS");
                 finalStates.put(29, "LEFT_PARANTHESIS");
                 finalStates.put(45, "IDENTIFIER");
+
                 finalStates.put(31, "ASPOSTROPHE");
                 finalStates.put(32, "SEMICOLON");
 
@@ -104,7 +137,7 @@ class Scanner {
 
                         //from state 0
                         { 45, 45, 45, 45, 6, 12, 45, 45, 4, 45,
-                                45, 20, 23, 45, 45, 45, 45, 45, 45, 54,
+                                45, 20, 23, 45, 45, 45, 45, 45, 45, 45,
                                 45, 45, 15, 45, 45, 45, 43, 41, 37, 39,
                                 26, 27, 29, 28, 31, 32, 99, 33, 34, 35,
                                 36, 50, 50, 50, 50, 50, 50, 50, 50, 50,
