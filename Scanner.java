@@ -1,3 +1,17 @@
+/**
+ * -----------------------------------------------------------------------------
+ * Project Name: Scanner (Phase 1)
+ * File Name: [Scanner.java]
+ * 
+ * Description:
+ *    A lexical scanner with basic functions, takes a stream of input and processes for tokens using a state transition table. 
+ * 
+ * -----------------------------------------------------------------------------
+ * Authors: Alejandro Santiago-Kwon, Jordan Dennison, Riley Potter, Matt Chehovin
+ * Reviewers: Jee McCloud, Ethan Glenn
+ * Date Created: September 12, 2024
+ * Date Last Modified: Septempter 27, 2024
+ * **/
 import java.util.*;
 
 class Scanner {
