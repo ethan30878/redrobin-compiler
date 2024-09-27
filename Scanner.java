@@ -560,7 +560,14 @@ class Scanner {
 
                                 if(finalStates.get(currentState) == null){
 
+                                        if(currentChar.equals(" ")){
+                                                currentState = 0;
+                                                output = 0;
+                                                continue;
+                                        }
                                         System.out.println("\n Invalid State Detected");
+
+
                                         break;
                                 }
 
@@ -596,9 +603,12 @@ class Scanner {
                         Token toAdd = new Token(finalStates.get(currentState),data);
                         tokens.add(toAdd);
                 } else{
-                        System.out.println("\n Invalid State Detected");
-                }
+                        if(!currentChar.equals(" ")){
+                                System.out.println("\n Invalid State Detected");
+                        }
 
+                }
+                System.out.println();
                 while(!tokens.isEmpty()) {
                         tokens.remove().print();
                 }
