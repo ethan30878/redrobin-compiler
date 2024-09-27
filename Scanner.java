@@ -607,17 +607,19 @@ class Scanner {
                         } else {
                                 data = input.substring(bookmark).trim();
                         }
-                        if(finalStates.get(currentState).equals("INT_LITERAL") || finalStates.get(currentState).equals("FLOAT_LITERAL")){
-                                if(!(currentChar.equals(" ") || currentChar.equals(";")|| currentChar.equals(")")|| currentChar.equals("(")|| currentChar.equals("{")|| currentChar.equals("}"))) {
+                        if((finalStates.get(currentState).equals("INT_LITERAL") || finalStates.get(currentState).equals("FLOAT_LITERAL"))&& symDictionary.get(currentChar) < 26){
+                               System.out.println(symDictionary.get(currentChar));
+                                if(symDictionary.get(currentChar) < 26) {
                                         System.out.println("\n Invalid State Detected");
 
                                 }
                         } else {
+
                                 Token toAdd = new Token(finalStates.get(currentState), data);
                                 tokens.add(toAdd);
                         }
                 } else{
-                        if(!(currentChar.equals(" ")|| currentChar.equals(";")|| currentChar.equals(")")|| currentChar.equals("(")|| currentChar.equals("{")|| currentChar.equals("}"))){
+                        if(symDictionary.get(currentChar) < 26){
                                 System.out.println("\n Invalid State Detected");
                         }
 
