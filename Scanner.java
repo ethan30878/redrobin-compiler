@@ -572,7 +572,7 @@ class Scanner {
                                 }
 
                                 if(finalStates.get(currentState).equals("INT_LITERAL")|| finalStates.get(currentState).equals("FLOAT_LITERAL")){
-                                        if(!currentChar.equals(" ")){
+                                        if(!(currentChar.equals(" ")|| currentChar.equals(";")|| currentChar.equals(")")|| currentChar.equals("(")|| currentChar.equals("{")|| currentChar.equals("}"))){
                                                 System.out.println("\n Invalid State Detected");
 
 
@@ -608,7 +608,7 @@ class Scanner {
                                 data = input.substring(bookmark).trim();
                         }
                         if(finalStates.get(currentState).equals("INT_LITERAL") || finalStates.get(currentState).equals("FLOAT_LITERAL")){
-                                if(!currentChar.equals(" ")){
+                                if(!(currentChar.equals(" ") || currentChar.equals(";")|| currentChar.equals(")")|| currentChar.equals("(")|| currentChar.equals("{")|| currentChar.equals("}"))) {
                                         System.out.println("\n Invalid State Detected");
 
                                 }
@@ -617,7 +617,7 @@ class Scanner {
                                 tokens.add(toAdd);
                         }
                 } else{
-                        if(!currentChar.equals(" ")){
+                        if(!(currentChar.equals(" ")|| currentChar.equals(";")|| currentChar.equals(")")|| currentChar.equals("(")|| currentChar.equals("{")|| currentChar.equals("}"))){
                                 System.out.println("\n Invalid State Detected");
                         }
 
