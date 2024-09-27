@@ -42,25 +42,24 @@ class Scanner {
                 symDictionary.put("{", 32);
                 symDictionary.put("(", 33);
                 symDictionary.put(")", 34);
-                symDictionary.put("\"", 35);
-                symDictionary.put("'", 36);
-                symDictionary.put(";", 37);
-                symDictionary.put(":", 38);
-                symDictionary.put("/", 39);
-                symDictionary.put("*", 40);
-                symDictionary.put("-", 41);
-                symDictionary.put("+", 42);
-                symDictionary.put("1", 43);
-                symDictionary.put("2", 44);
-                symDictionary.put("3", 45);
-                symDictionary.put("4", 46);
-                symDictionary.put("5", 47);
-                symDictionary.put("6", 48);
-                symDictionary.put("7", 49);
-                symDictionary.put("8", 50);
-                symDictionary.put("9", 51);
-                symDictionary.put("0", 52);
-                symDictionary.put(" ", 53);
+                symDictionary.put("'", 35);
+                symDictionary.put(";", 36);
+                symDictionary.put(":", 37);
+                symDictionary.put("/", 38);
+                symDictionary.put("*", 39);
+                symDictionary.put("-", 40);
+                symDictionary.put("+", 41);
+                symDictionary.put("1", 42);
+                symDictionary.put("2", 43);
+                symDictionary.put("3", 44);
+                symDictionary.put("4", 45);
+                symDictionary.put("5", 46);
+                symDictionary.put("6", 47);
+                symDictionary.put("7", 48);
+                symDictionary.put("8", 49);
+                symDictionary.put("9", 50);
+                symDictionary.put("0", 51);
+                symDictionary.put(" ", 52);
 
                 // Final State Dictionary
                 // GENERAL SYMBOLS
@@ -68,7 +67,6 @@ class Scanner {
                 finalStates.put("{", "LEFT_CURLY_BRACKET");
                 finalStates.put(")", "RIGHT_PARANTHESIS");
                 finalStates.put("(", "LEFT_PARANTHESIS");
-                finalStates.put("\"", "QUOTATION_MARK");
                 finalStates.put("'", "ASPOSTROPHE");
                 finalStates.put(";", "SEMICOLON");
                 finalStates.put(":", "COLON");
@@ -482,12 +480,12 @@ class Scanner {
 
                         currentChar = String.valueOf(input.charAt(i));
 
-                        int columnIndex = symDictionary.get(currentChar) - 1;
+                        int columnIndex = symDictionary.get(currentChar);
 
                         lastInput = columnIndex;
 
                         // Reference transition table
-                        output = transitionTable[currentState][columnIndex];
+                        output = transitionTable[currentState][columnIndex-1];
 
                         System.out.println("Current Character: " + currentChar);
                         System.out.println("Current Subtring: " + input.substring(bookmark, i));
@@ -503,7 +501,6 @@ class Scanner {
                                 System.out.println();
 
                                 // Need to keep track of the last character that was read
-
                                 bookmark = i;
                                 i--;
                                 currentState = 0;
