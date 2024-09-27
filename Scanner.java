@@ -1,13 +1,33 @@
 import java.util.*;
 
 class Scanner {
+
+
         public static void main(String args[]) {
 
+                 class Token {
+                        String tokenIdentifier;
+                        String Data;
+
+                        public Token(String tokenIdentifier, String Data) {
+                                this.tokenIdentifier = tokenIdentifier;
+                                this.Data = Data;
+                        }
+                        public void print(){
+                                if(tokenIdentifier.equals("INT_LITERAL") || tokenIdentifier.equals("FLOAT_LITERAL") || tokenIdentifier.equals("IDENTIFIER")) {
+                                        System.out.println(tokenIdentifier + " Data:  " + Data);
+                                } else {
+                                        System.out.println(tokenIdentifier);
+                                }
+
+                        }
+                }
                 // Instatiate dictionary and table
                 Dictionary<String, Integer> symDictionary = new Hashtable<String, Integer>();
                 Dictionary<Integer, String> finalStates = new Hashtable<Integer, String>();
+                Queue<Token> tokens = new LinkedList<>();
 
-                StringBuilder Tokens = new StringBuilder();
+
                 // symDictionary.put(" ", 0);
                 symDictionary.put("a", 0);
                 symDictionary.put("b", 1);
@@ -43,24 +63,24 @@ class Scanner {
                 symDictionary.put("{", 31);
                 symDictionary.put("(", 32);
                 symDictionary.put(")", 33);
-                symDictionary.put("\"", 34);
-                symDictionary.put("'", 35);
-                symDictionary.put(";", 36);
-                symDictionary.put(":", 37);
-                symDictionary.put("/", 38);
-                symDictionary.put("*", 39);
-                symDictionary.put("-", 40);
-                symDictionary.put("+", 41);
-                symDictionary.put("1", 42);
-                symDictionary.put("2", 43);
-                symDictionary.put("3", 44);
-                symDictionary.put("4", 45);
-                symDictionary.put("5", 46);
-                symDictionary.put("6", 47);
-                symDictionary.put("7", 48);
-                symDictionary.put("8", 49);
-                symDictionary.put("9", 50);
-                symDictionary.put("0", 51);
+                symDictionary.put("'", 34);
+                symDictionary.put(";", 35);
+                symDictionary.put(":", 36);
+                symDictionary.put("/", 37);
+                symDictionary.put("*", 38);
+                symDictionary.put("-", 39);
+                symDictionary.put("+", 40);
+                symDictionary.put("1", 41);
+                symDictionary.put("2", 42);
+                symDictionary.put("3", 43);
+                symDictionary.put("4", 44);
+                symDictionary.put("5", 45);
+                symDictionary.put("6", 46);
+                symDictionary.put("7", 47);
+                symDictionary.put("8", 48);
+                symDictionary.put("9", 49);
+                symDictionary.put("0", 50);
+                symDictionary.put(".", 51);
                 symDictionary.put(" ", 52);
 
                 // Final State Dictionary
@@ -77,9 +97,9 @@ class Scanner {
                 finalStates.put(13, "IDENTIFIER");
                 finalStates.put(48, "IDENTIFIER");
                 finalStates.put(10, "IDENTIFIER");
-                finalStates.put(50, "IDENTIFIER");
-                finalStates.put(51, "IDENTIFIER");
-                finalStates.put(52, "IDENTIFIER");
+
+                finalStates.put(50, "INT_LITERAL");
+                finalStates.put(51, "FLOAT_LITERAL");
 
                 finalStates.put(15, "IDENTIFIER");
                 finalStates.put(16, "IDENTIFIER");
@@ -92,9 +112,8 @@ class Scanner {
                 finalStates.put(23, "IDENTIFIER");
                 finalStates.put(24, "IDENTIFIER");
 
-                finalStates.put(54, "IDENTIFIER");
-                finalStates.put(55, "IDENTIFIER");
-                finalStates.put(56, "IDENTIFIER");
+
+
 
                 // GENERAL SYMBOLS
                 finalStates.put(26, "RIGHT_CURLY_BRACKET");
@@ -143,6 +162,7 @@ class Scanner {
                                 36, 50, 50, 50, 50, 50, 50, 50, 50, 50,
                                 50, 99, 99 },
                         //from state 1
+
                         { 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                                 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                                 45, 45, 45, 45, 45, 45, 99, 99, 99, 99,
@@ -345,7 +365,13 @@ class Scanner {
                                 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                                 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                                 99, 99, 99 },
-                        {},
+                        //from state 30 PLACE HOLDER NOT A VALID STATE
+                        { 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+                                99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+                                99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+                                99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+                                99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+                                99, 99, 99 },
                         //from state 31
                         { 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                                 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
@@ -496,7 +522,6 @@ class Scanner {
 
                 };
 
-
                 // Printing read in statement
                 System.out.println("Enter a statement: ");
 
@@ -508,6 +533,8 @@ class Scanner {
                 int currentState = 0;
                 String currentChar = "";
                 int bookmark = 0;
+
+                String data = "";
 
 
 
@@ -537,11 +564,18 @@ class Scanner {
                                         break;
                                 }
 
-                                Tokens.append("\n ").append(finalStates.get(currentState));
+
+                                data = input.substring(bookmark, i);
+                                Token toAdd = new Token(finalStates.get(currentState),data);
+
+                                tokens.add(toAdd);
+
+                                bookmark = i;
                                 if(currentChar.equals(" ")){
                                         currentState = 0;
                                         output = 0;
-                                        bookmark = i;
+
+
                                 } else{
                                         currentState = transitionTable[0][symDictionary.get(currentChar)];
                                 }
@@ -553,11 +587,21 @@ class Scanner {
                 }
                 if(finalStates.get(currentState) != null) {
 
-                        Tokens.append("\n ").append(finalStates.get(currentState));
+                        if(bookmark == 0){
+                                data = input;
+                        } else {
+                                data = input.substring(bookmark);
+                        }
+
+                        Token toAdd = new Token(finalStates.get(currentState),data);
+                        tokens.add(toAdd);
                 } else{
                         System.out.println("\n Invalid State Detected");
                 }
-                System.out.println(Tokens.toString());
+
+                while(!tokens.isEmpty()) {
+                        tokens.remove().print();
+                }
         }
 
 }
