@@ -62,11 +62,8 @@ class Scanner {
                 symDictionary.put("0", 52);
                 symDictionary.put(" ", 53);
 
-                // symDictionary.put("19", 54);
-                // symDictionary.put("f32", 55);
-                // symDictionary.put("i64", 56);
-                // symDictionary.put("f64", 57);
-
+                // Final State Dictionary
+                // GENERAL SYMBOLS
                 finalStates.put("}", "RIGHT_CURLY_BRACKET");
                 finalStates.put("{", "LEFT_CURLY_BRACKET");
                 finalStates.put(")", "RIGHT_PARANTHESIS");
@@ -75,11 +72,13 @@ class Scanner {
                 finalStates.put("'", "ASPOSTROPHE");
                 finalStates.put(";", "SEMICOLON");
                 finalStates.put(":", "COLON");
+
                 // MATH SYMBOLS
                 finalStates.put("/", "DIVISION_OPERATOR");
                 finalStates.put("*", "MULTIPLICATION_OPERATOR");
                 finalStates.put("-", "SUBTRACTION_OPERATOR");
                 finalStates.put("+", "ADDITON_OPERATOR");
+
                 // COMPARISON OPERATORS
                 finalStates.put("<", "LESS_THAN_OPERATOR");
                 finalStates.put("<=", "LESS_THAN_OR_EQUAL_OPERATOR");
@@ -88,6 +87,7 @@ class Scanner {
                 finalStates.put("!=", "NOT_EQUAL_OPERATOR");
                 finalStates.put("=", "ASSIGNMENT_OPERATOR");
                 finalStates.put("==", "IS_EQUAL_OPERATOR");
+
                 // KEYWORDS
                 finalStates.put("if", "IF_KEYWORD");
                 finalStates.put("else", "ELSE_KEYWORD");
@@ -179,8 +179,7 @@ class Scanner {
                                                 45, 45, 45, 45,
                                                 45, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                                                 99, 10, 99, 99, 48, 99,
-                                                99, 99, 99, 99
-                                },
+                                                99, 99, 99, 99 },
                                 // From state 13
                                 { 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 14, 45, 45, 45,
                                                 45, 45, 45, 45,
@@ -413,113 +412,50 @@ class Scanner {
 
                 // Instantiate index for the transition table
                 int output = 0;
-                int row = 0;
-                String tempString = "";
-                String lastChar = "";
+                int currentState = 0;
                 String currentChar = "";
-                int flag = 0;
+                int bookmark = 0;
+                int lastInput = 0;
 
+                input = input.replaceAll("\\s", "");
+
+                // Scanner Loop
                 for (int i = 0; i < input.length(); i++) {
 
-                        if (flag == 1) {
-                                currentChar = String.valueOf(tempString);
-                                flag = 0;
-
-                        } else {
-                                currentChar = String.valueOf(input.charAt(i));
-                        }
+                        currentChar = String.valueOf(input.charAt(i));
 
                         int columnIndex = symDictionary.get(currentChar) - 1;
 
-                        // if (columnIndex == 52) {
-                        // System.out.println(finalStates.get(tempString));
-                        // System.out.println();
-
-                        // row = 0;
-                        // tempString = "";
-                        // continue;
-                        // }
-
-                        tempString += currentChar;
+                        lastInput = columnIndex;
 
                         // Reference transition table
-                        output = transitionTable[row][columnIndex];
+                        output = transitionTable[currentState][columnIndex];
 
-                        System.out.println("Current character: " + currentChar);
-                        System.out.println("Current string: " + tempString);
+                        System.out.println("Current Character: " + currentChar);
+                        System.out.println("Current Subtring: " + input.substring(bookmark, i));
                         System.out.println("Column Index: " + columnIndex);
-                        System.out.println("Row Index: " + row);
+                        System.out.println("Current State Index: " + currentState);
                         System.out.println("Output: " + output);
 
-                        // if (output == 45) {
+                        if (output == 99 || input.length() == i) {
 
-                        // while (output != 99 && i != input.length() - 1) {
+                                String token = input.substring(bookmark, i);
 
-                        // currentChar = String.valueOf(input.charAt(i));
-                        // columnIndex = symDictionary.get(currentChar) - 1;
-
-                        // }
-
-                        // System.out.println("IDENTIFIER: " + tempString);
-                        // System.out.println();
-                        // row = 0;
-                        // tempString = "";
-                        // break;
-                        // }
-
-                        if ((output >= 26 && output <= 36) || output == 44 || output == 42 || output == 40
-                                        || output == 38) {
-                                System.out.println(finalStates.get(tempString));
+                                System.out.println(finalStates.get(token) + ": " + token);
                                 System.out.println();
 
-                                row = 0;
-                                tempString = "";
+                                // Need to keep track of the last character that was read
+
+                                bookmark = i;
+                                i--;
+                                currentState = 0;
+                                continue;
+
                         }
 
-                        if (output == 99) {
-
-                                lastChar = String.valueOf(tempString.charAt(tempString.length() - 1));
-
-                                String lookup = tempString.substring(0, tempString.length() - 1);
-
-                                if (finalStates.get(lookup) == null) {
-                                        System.out.println("IDENTIFIER: " + lookup);
-                                        System.out.println();
-                                }
-
-                                System.out.println("NULL? " + finalStates.get(lookup));
-                                System.out.println();
-
-                                row = 0;
-                                tempString = lastChar;
-                                flag = 1;
-                        }
-
-                        row = output;
+                        currentState = output;
 
                 }
-
-                // if (currentState == 99) {
-
-                // // if (tempString.length() == 0) {
-                // // System.out.println("Whitespace");
-                // // System.out.println();
-                // // tempString = "";
-                // // }
-
-                // if ((tempString.length() > 0)) {
-
-                // if (tempString.equals(" ")) {
-
-                // } else {
-                // System.out.println("IDENTIFIER: " + tempString);
-                // System.out.println();
-                // }
-                // }
-
-                // currentState = 0;
-                // tempString = "";
-                // }
 
         }
 
