@@ -1,6 +1,6 @@
 /**
  * -----------------------------------------------------------------------------
- * Project Name: Scanner Phase 1
+ * Project Name: Scanner (Phase 1)
  * File Name: [Scanner.java]
  * 
  * Description:
@@ -544,4 +544,40 @@ class Scanner {
                 }
         }
 
+}
+
+enum TokenName {
+        RIGHT_CURLY_BRACKET,
+        LEFT_CURLY_BRACKET,
+        RIGHT_PARANTHESIS,
+        LEFT_PARANTHESIS,
+        ASPOSTROPHE,
+        SEMICOLON,
+        COLON,
+        DIVISION_OPERATOR,
+        MULTIPLICATION_OPERATOR,
+        SUBTRACTION_OPERATOR,
+        ADDITON_OPERATOR,
+        LESS_THAN_OPERATOR,
+        LESS_THAN_OR_EQUAL_OPERATOR,
+        GREATHER_THAN_OPERATOR,
+        GREATHER_THAN_OR_EQUAL_OPERATOR,
+        NOT_EQUAL_OPERATOR,
+        ASSIGNMENT_OPERATOR,
+        IS_EQUAL_OPERATOR,
+        IF_KEYWORD,
+        ELSE_KEYWORD,
+        WHILE_KEYWORD,
+        FOR_KEYWORD,
+        LET_KEYWORD,
+        IN_KEYWORD,
+        MUT_KEYWORD,
+        i32_KEYWORD,
+        f32_KEYWORD
+}
+
+record Token(TokenName name, Object value) {
+        Token(TokenName name) {
+                this(name, null);
+        }
 }
