@@ -7,7 +7,7 @@ class Scanner {
                 Dictionary<String, Integer> symDictionary = new Hashtable<String, Integer>();
                 Dictionary<String, String> finalStates = new Hashtable<String, String>();
 
-                symDictionary.put(" ", 0);
+                // symDictionary.put(" ", 0);
                 symDictionary.put("a", 1);
                 symDictionary.put("b", 2);
                 symDictionary.put("c", 3);
@@ -376,7 +376,8 @@ class Scanner {
                                 // From state 45
                                 { 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                                                 45, 45, 45, 45, 45, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
-                                                99, 99, 99, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45 },
+                                                99, 99, 99, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 99
+                                },
                                 // From state 46
                                 { 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                                                 45, 45, 45, 45,
@@ -411,103 +412,101 @@ class Scanner {
                 String input = System.console().readLine();
 
                 // Instantiate index for the transition table
-                int currentState = 0;
-                int previousState = 0;
+                int output = 0;
+                int row = 0;
                 String tempString = "";
 
                 for (int i = 0; i < input.length(); i++) {
 
                         String currentChar = String.valueOf(input.charAt(i));
 
-                        tempString += currentChar;
+                        int columnIndex = symDictionary.get(currentChar) - 1;
 
-                        int inputValIndex = symDictionary.get(currentChar) - 1;
-
-                        // Reference transition table
-                        currentState = transitionTable[currentState][inputValIndex];
-
-                        System.out.println("Current character: " + currentChar);
-                        System.out.println("Current string: " + tempString);
-                        System.out.println("Input index value: " + inputValIndex);
-                        System.out.println("Current state: " + currentState);
-
-                        previousState = currentState;
-
-                        if (currentState == 45) {
-
-                                while (symDictionary.get(String.valueOf(input.charAt(i + 1))) - 1 >= 1 && symDictionary
-                                                .get(String.valueOf(input.charAt(i + 1))) - 1 <= 26) {
-                                        i++;
-                                        currentChar = String.valueOf(input.charAt(i));
-                                        tempString += currentChar;
-                                }
-
-                                System.out.println("IDENTIFIER: " + tempString);
-                                System.out.println();
-                                currentState = 0;
-                                tempString = "";
-                        }
-
-                        if (finalStates.get(tempString) != null) {
-
-                                // // Special Case for ==
-                                // if ((tempString.equals("="))
-                                // && (String.valueOf(input.charAt(i + 1)).equals("="))) {
-                                // i++;
-                                // tempString += "=";
-                                // }
-
-                                // // Special Case for !=
-                                // if ((tempString.equals("!"))
-                                // && (String.valueOf(input.charAt(i + 1)).equals("="))) {
-                                // i++;
-                                // tempString += "=";
-                                // }
-
-                                // // Special Case for <=
-                                // if ((tempString.equals("<"))
-                                // && (String.valueOf(input.charAt(i + 1)).equals("="))) {
-                                // i++;
-                                // tempString += "=";
-                                // }
-
-                                // // Special Case for >=
-                                // if ((tempString.equals(">"))
-                                // && (String.valueOf(input.charAt(i + 1)).equals("="))) {
-                                // i++;
-                                // tempString += "=";
-                                // }
-
+                        if (columnIndex == 52) {
                                 System.out.println(finalStates.get(tempString));
                                 System.out.println();
 
-                                currentState = 0;
+                                row = 0;
+                                tempString = "";
+                                continue;
+                        }
+
+                        tempString += currentChar;
+
+                        // Reference transition table
+                        output = transitionTable[row][columnIndex];
+
+                        System.out.println("Current character: " + currentChar);
+                        System.out.println("Current string: " + tempString);
+                        System.out.println("Column Index: " + columnIndex);
+                        System.out.println("Row Index: " + row);
+                        System.out.println("Output: " + output);
+
+                        // if (output == 45) {
+
+                        // while (output != 99 && i != input.length() - 1) {
+
+                        // currentChar = String.valueOf(input.charAt(i));
+                        // columnIndex = symDictionary.get(currentChar) - 1;
+
+                        // }
+
+                        // System.out.println("IDENTIFIER: " + tempString);
+                        // System.out.println();
+                        // row = 0;
+                        // tempString = "";
+                        // break;
+                        // }
+
+                        if ((output >= 26 && output <= 36) || output == 44 || output == 42 || output == 40
+                                        || output == 38) {
+                                System.out.println(finalStates.get(tempString));
+                                System.out.println();
+
+                                row = 0;
                                 tempString = "";
                         }
 
-                        if (currentState == 99) {
+                        if (output == 99) {
 
-                                // if (tempString.length() == 0) {
-                                // System.out.println("Whitespace");
-                                // System.out.println();
-                                // tempString = "";
-                                // }
-
-                                if ((tempString.length() > 0)) {
-
-                                        if (tempString.equals(" ")) {
-
-                                        } else {
-                                                System.out.println("IDENTIFIER: " + tempString);
-                                                System.out.println();
-                                        }
+                                if (finalStates.get(tempString) == null) {
+                                        System.out.println("IDENTIFIER: " + tempString);
+                                        System.out.println();
                                 }
 
-                                currentState = 0;
+                                System.out.println("NULL? " + finalStates.get(tempString));
+                                System.out.println();
+
+                                row = 0;
                                 tempString = "";
                         }
+
+                        row = output;
 
                 }
 
+                // if (currentState == 99) {
+
+                // // if (tempString.length() == 0) {
+                // // System.out.println("Whitespace");
+                // // System.out.println();
+                // // tempString = "";
+                // // }
+
+                // if ((tempString.length() > 0)) {
+
+                // if (tempString.equals(" ")) {
+
+                // } else {
+                // System.out.println("IDENTIFIER: " + tempString);
+                // System.out.println();
+                // }
+                // }
+
+                // currentState = 0;
+                // tempString = "";
+                // }
+
         }
+
 }
