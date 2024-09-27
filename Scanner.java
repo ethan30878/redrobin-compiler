@@ -415,21 +415,30 @@ class Scanner {
                 int output = 0;
                 int row = 0;
                 String tempString = "";
+                String lastChar = "";
+                String currentChar = "";
+                int flag = 0;
 
                 for (int i = 0; i < input.length(); i++) {
 
-                        String currentChar = String.valueOf(input.charAt(i));
+                        if (flag == 1) {
+                                currentChar = String.valueOf(tempString);
+                                flag = 0;
+
+                        } else {
+                                currentChar = String.valueOf(input.charAt(i));
+                        }
 
                         int columnIndex = symDictionary.get(currentChar) - 1;
 
-                        if (columnIndex == 52) {
-                                System.out.println(finalStates.get(tempString));
-                                System.out.println();
+                        // if (columnIndex == 52) {
+                        // System.out.println(finalStates.get(tempString));
+                        // System.out.println();
 
-                                row = 0;
-                                tempString = "";
-                                continue;
-                        }
+                        // row = 0;
+                        // tempString = "";
+                        // continue;
+                        // }
 
                         tempString += currentChar;
 
@@ -469,16 +478,21 @@ class Scanner {
 
                         if (output == 99) {
 
-                                if (finalStates.get(tempString) == null) {
-                                        System.out.println("IDENTIFIER: " + tempString);
+                                lastChar = String.valueOf(tempString.charAt(tempString.length() - 1));
+
+                                String lookup = tempString.substring(0, tempString.length() - 1);
+
+                                if (finalStates.get(lookup) == null) {
+                                        System.out.println("IDENTIFIER: " + lookup);
                                         System.out.println();
                                 }
 
-                                System.out.println("NULL? " + finalStates.get(tempString));
+                                System.out.println("NULL? " + finalStates.get(lookup));
                                 System.out.println();
 
                                 row = 0;
-                                tempString = "";
+                                tempString = lastChar;
+                                flag = 1;
                         }
 
                         row = output;
