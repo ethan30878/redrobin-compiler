@@ -13,10 +13,12 @@
  * Date Last Modified: Septempter 27, 2024
  * **/
 import java.util.*;
-
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 class Scanner {
 
-        public static void main(String args[]) {
+        public static void main(String args[]) throws IOException {
 
                 class Token {
                         String tokenIdentifier;
@@ -74,8 +76,8 @@ class Scanner {
                 symDictionary.put("!", 29);
                 symDictionary.put("}", 30);
                 symDictionary.put("{", 31);
-                symDictionary.put("(", 32);
-                symDictionary.put(")", 33);
+                symDictionary.put(")", 32);
+                symDictionary.put("(", 33);
                 symDictionary.put("'", 34);
                 symDictionary.put(";", 35);
                 symDictionary.put(":", 36);
@@ -534,8 +536,14 @@ class Scanner {
                 System.out.println("Enter a statement: ");
 
                 // Read in statement
-                String input = System.console().readLine();
-
+                //String input = System.console().readLine();
+		StringBuilder stringBuilder = new StringBuilder();
+        	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in)); 
+		String line;
+		while ((line = stdin.readLine()) != null && line.length()!= 0) { 
+			stringBuilder.append(line);
+		}
+		String input = stringBuilder.toString();
                 // Instantiate index for the transition table
                 int currentState = 0;
 
