@@ -15,8 +15,13 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Iterator;
 public class Parser {
-	int index = 0;
+
+
+	
     // Let's get parsing
     // test
 	
@@ -24,21 +29,16 @@ public class Parser {
 		class Token {
 	        String tokenIdentifier;
 	        String Data;
-
+		
+		
 	        public Token(String tokenIdentifier, String Data) {
-	                this.tokenIdentifier = tokenIdentifier;
-	                this.Data = Data;
-	        }
-
-	        public void print() {
-	                if (tokenIdentifier.equals("INT_LITERAL") || tokenIdentifier.equals("FLOAT_LITERAL") || tokenIdentifier.equals("IDENTIFIER")) {
-	                        System.out.println(tokenIdentifier + " Data:  " + Data);
-	                } else {
-	                        System.out.println(tokenIdentifier);
-	                }
+	        	this.tokenIdentifier = tokenIdentifier;
+	        	this.Data = Data;
 	        }
 		}
-		//Read output of tokens from Scanner
+		int index = 0;
+		Queue<Token> tokens = new LinkedList<>();
+		
 		BufferedReader reader;
 
 		try {
@@ -50,24 +50,46 @@ public class Parser {
 
 			while (line != null) {
 				System.out.println(line);
+				String tokenIdentifier = line;
 				// read next line
 				line = reader.readLine();
+				String finalData = null;
+				if (line != null && line.startsWith("IDENTIFIER Data:")) {
+					//Add data to token
+					String[] data = line.split("\\:");
+					finalData = data[1];
+				}
+				Token a = new Token(tokenIdentifier, finalData);
+				tokens.add(a);
+				line = reader.readLine();
+				
 			}
 
 			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		Iterator iT = tokens.iterator();
+	      System.out.println("Contents of the queue are :");
+	      
+	      while(iT.hasNext()) {
+	         System.out.println(iT.next());  
+	      }
+//	        public void print() {
+//	                if (tokenIdentifier.equals("INT_LITERAL") || tokenIdentifier.equals("FLOAT_LITERAL") || tokenIdentifier.equals("IDENTIFIER")) {
+//	                        System.out.println(tokenIdentifier + " Data:  " + Data);
+//	                } else {
+//	                        System.out.println(tokenIdentifier);
+//	                }
+//	        }
+//		
+		//Read output of tokens from Scanner
+
+	
 	}
-		
-		
-	
-//	tokens[][] = new String[]][];
-	
-	public void GetToken(){
-//		Check to see if our stream is empty
-//		Retrieve next token from stream and make current token
-	}	
+	public void GetTokens(){
+
+	}
 
 	public void Match(){
 //		If token we expect equals current token
@@ -90,7 +112,7 @@ public class Parser {
 
 
 	public String NewTempValue(){
-		index=0;
+//		index=0;
 //		Increment index everytime function is called
 //		Return unique value like t0 using index
 		return "asdf";
