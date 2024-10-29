@@ -1,3 +1,4 @@
+
 /**
  * -----------------------------------------------------------------------------
  * Project Name: Parser (Phase 2)
@@ -18,104 +19,170 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Iterator;
+
 public class Parser {
 
+	static class Token {
 
-	
-    // Let's get parsing
-    // test
-	
-	public static void main (String[] args) {
-		class Token {
-	        String tokenIdentifier;
-	        String Data;
-		
-		
-	        public Token(String tokenIdentifier, String Data) {
-	        	this.tokenIdentifier = tokenIdentifier;
-	        	this.Data = Data;
-	        }
+		String tokenIdentifier;
+		String data;
+
+		public Token(String tokenIdentifier, String data) {
+			this.tokenIdentifier = tokenIdentifier;
+			this.data = data;
 		}
-		int index = 0;
-		Queue<Token> tokens = new LinkedList<>();
-		
-		BufferedReader reader;
 
-		try {
-			reader = new BufferedReader(new FileReader("../phase1/output.txt"));
-			String line = reader.readLine();
-			//Hardcoding deletion of the first two lines. Fix this later
-			line = reader.readLine();
-			line = reader.readLine();
+		public String toString() {
+			return tokenIdentifier + " Data:  " + data;
+		}
+	}
 
-			while (line != null) {
-				System.out.println(line);
-				String tokenIdentifier = line;
-				// read next line
-				line = reader.readLine();
-				String finalData = null;
-				if (line != null && line.startsWith("IDENTIFIER Data:")) {
-					//Add data to token
-					String[] data = line.split("\\:");
-					finalData = data[1];
-				}
-				Token a = new Token(tokenIdentifier, finalData);
-				tokens.add(a);
-				line = reader.readLine();
-				
+	Queue<Token> tokens;
+	private Token currentToken;
+	int index = 0;
+
+	public Parser(Queue<Token> tokens) {
+		this.tokens = tokens;
+		System.out.println("Parser Tokens: " + this.tokens);
+	}
+
+	private void advance() {
+		currentToken = tokens.poll();
+	}
+
+	public void parse() {
+
+		// Get the first token
+		currentToken = tokens.poll();
+
+		// Start parsing the expression
+		parseExpression();
+
+	}
+
+	private void parseExpression() {
+
+		// While there are still tokens to parse
+		while (currentToken != null) {
+
+			// Parse the terms
+			if (currentToken.tokenIdentifier.equals("LET_KEYWORD")) {
+				System.out.println("LET_KEYWORD");
+				advance();
+				parseDecl();
+				continue;
 			}
-
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		Iterator iT = tokens.iterator();
-	      System.out.println("Contents of the queue are :");
-	      
-	      while(iT.hasNext()) {
-	         System.out.println(iT.next());  
-	      }
-//	        public void print() {
-//	                if (tokenIdentifier.equals("INT_LITERAL") || tokenIdentifier.equals("FLOAT_LITERAL") || tokenIdentifier.equals("IDENTIFIER")) {
-//	                        System.out.println(tokenIdentifier + " Data:  " + Data);
-//	                } else {
-//	                        System.out.println(tokenIdentifier);
-//	                }
-//	        }
-//		
-		//Read output of tokens from Scanner
-
-	
-	}
-	public void GetTokens(){
 
 	}
 
-	public void Match(){
-//		If token we expect equals current token
-//			Retrieve next token
-//		Else throw syntax error
-	}
-	public void MatchIdentifier(){
+	private void parseDecl() {
+
+		match("IDENTIFIER");
+
+		advance();
+
+		match("COLON");
+
+		advance();
+
+		if (currentToken.tokenIdentifier.equals("I32_KEYWORD") || currentToken.tokenIdentifier.equals("I64_KEYWORD")
+				|| currentToken.tokenIdentifier.equals("F32_KEYWORD")
+				|| currentToken.tokenIdentifier.equals("F64_KEYWORD")) {
+
+			System.out.println("Matched: " + currentToken.tokenIdentifier);
+
+			advance();
+
+			match("ASSIGNMENT_OPERATOR");
+
+			advance();
+
+			// parseExpression();
+
+			// advance();
+
+			match("SEMICOLON");
+
+		} else {
+			throw new RuntimeException("Error: Expected type keyword but got " + currentToken.tokenIdentifier);
+		}
 
 	}
 
-	public void MatchIntLiteral(){
+	public void parseAssign() {
+
+		match("IDENTIFIER");
+
+		advance();
+
+		match("ASSIGNMENT_OPERATOR");
+
+		advance();
+
+		// parseExpression();
+
+		// advance();
+
+		match("SEMICOLON");
 
 	}
-	public String Peek(){
-//		Checks if stream has a next token
-//		If so then return next token
-//		Otherwise we can probably throw an error
-		return "asdf";
+
+	public void parseBase() {
+
+		if (currentToken.tokenIdentifier.equals("INT_LITERAL") || currentToken.tokenIdentifier.equals("FLOAT_LITERAL")
+				|| currentToken.tokenIdentifier.equals("IDENTIFIER")) {
+
+			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+
+			advance();
+
+			// TODO: There is another else if in the DOC
+		} else {
+
+			throw new RuntimeException(
+					"Error: Expected int literal or identifier but got " + currentToken.tokenIdentifier);
+
+		}
+
 	}
 
+	public void match(String expectedToken) {
 
-	public String NewTempValue(){
-//		index=0;
-//		Increment index everytime function is called
-//		Return unique value like t0 using index
-		return "asdf";
+		if (currentToken.tokenIdentifier == expectedToken) {
+
+			System.out.println("Matched: " + expectedToken + " --> " + currentToken.data);
+
+		} else {
+
+			System.out.println("Error: Expected " + expectedToken + " but got " + currentToken.tokenIdentifier);
+
+		}
+
+	}
+
+	public void matchIdentifier() {
+
+	}
+
+	public void matchIntLiteral() {
+
+	}
+
+	public static void main(String[] args) {
+		Queue<Token> tokens = new LinkedList<>();
+
+		// Populate tokens for testing (add sample tokens here)
+		tokens.add(new Token("LET_KEYWORD", "let"));
+		tokens.add(new Token("IDENTIFIER", "id"));
+		tokens.add(new Token("COLON", ":"));
+		tokens.add(new Token("I32_KEYWORD", "i32"));
+		tokens.add(new Token("ASSIGNMENT_OPERATOR", "="));
+		// tokens.add(new Token("IDENTIFIER", "x"));
+		tokens.add(new Token("SEMICOLON", ";"));
+
+		Parser parser = new Parser(tokens);
+		parser.parse();
 	}
 
 }
