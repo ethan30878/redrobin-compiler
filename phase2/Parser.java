@@ -39,12 +39,12 @@ public class Parser {
 	}
 
 	Queue<Token> tokens;
+	Queue<Queue<String>> atoms = new LinkedList<Queue<String>>();
 	private Token currentToken;
 	int index = 0;
 
 	public Parser(Queue<Token> tokens) {
 		this.tokens = tokens;
-		// System.out.println("Parser Tokens: " + this.tokens);
 	}
 
 	private void advance() {
@@ -60,15 +60,6 @@ public class Parser {
 		parseStatement();
 
 	}
-
-	// private void parseExpression() {
-
-	// // While there are still tokens to parse
-	// while (currentToken != null) {
-
-	// }
-
-	// }
 
 	private void parseDecl() {
 
@@ -108,6 +99,8 @@ public class Parser {
 
 	public void parseAssign() {
 
+		Queue<String> atom = new LinkedList<String>();
+
 		match("IDENTIFIER");
 
 		advance();
@@ -119,6 +112,8 @@ public class Parser {
 		parseExpr();
 
 		match("SEMICOLON");
+
+		atoms.add(atom);
 
 	}
 
