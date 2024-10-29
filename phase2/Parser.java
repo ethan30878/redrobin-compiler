@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Parser {
@@ -401,7 +402,37 @@ public class Parser {
 
 	}
 
+	public static String[] readFileToArray(String filename) {
+		ArrayList<String> lines = new ArrayList<>();
+
+		try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				lines.add(line);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return lines.toArray(new String[0]);
+	}
+
 	public static void main(String[] args) {
+
+		// Test to read in txt file
+		Queue<Token> tokensTest = new LinkedList<>();
+		String filename = "phase2/output.txt";
+		String[] fileLines = readFileToArray(filename);
+
+		for (String line : fileLines) {
+			String[] lineTokens = line.split(" ");
+			tokensTest.add(new Token(lineTokens[0], lineTokens[1]));
+		}
+
+		System.out.println();
+		System.out.println("Token Test: " + tokensTest);
+		System.out.println();
+
 		Queue<Token> tokens = new LinkedList<>();
 
 		// Populate tokens for testing (add sample tokens here)
