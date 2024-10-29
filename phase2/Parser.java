@@ -44,7 +44,7 @@ public class Parser {
 
 	public Parser(Queue<Token> tokens) {
 		this.tokens = tokens;
-		System.out.println("Parser Tokens: " + this.tokens);
+		// System.out.println("Parser Tokens: " + this.tokens);
 	}
 
 	private void advance() {
@@ -57,27 +57,24 @@ public class Parser {
 		currentToken = tokens.poll();
 
 		// Start parsing the expression
-		parseExpression();
+		parseStatement();
 
 	}
 
-	private void parseExpression() {
+	// private void parseExpression() {
 
-		// While there are still tokens to parse
-		while (currentToken != null) {
+	// // While there are still tokens to parse
+	// while (currentToken != null) {
 
-			// Parse the terms
-			if (currentToken.tokenIdentifier.equals("LET_KEYWORD")) {
-				System.out.println("LET_KEYWORD");
-				advance();
-				parseDecl();
-				continue;
-			}
-		}
+	// }
 
-	}
+	// }
 
 	private void parseDecl() {
+
+		match("LET_KEYWORD");
+
+		advance();
 
 		match("IDENTIFIER");
 
@@ -99,9 +96,7 @@ public class Parser {
 
 			advance();
 
-			// parseExpression();
-
-			// advance();
+			parseExpr();
 
 			match("SEMICOLON");
 
@@ -121,9 +116,7 @@ public class Parser {
 
 		advance();
 
-		// parseExpression();
-
-		// advance();
+		parseExpr();
 
 		match("SEMICOLON");
 
@@ -138,8 +131,19 @@ public class Parser {
 
 			advance();
 
-			// TODO: There is another else if in the DOC
-		} else {
+		} else if (currentToken.tokenIdentifier.equals("LEFT_PARANTHESIS")) {
+
+			match("LEFT_PARANTHESIS");
+
+			advance();
+
+			parseExpr();
+
+			match("RIGHT_PARANTHESIS");
+
+		}
+
+		else {
 
 			throw new RuntimeException(
 					"Error: Expected int literal or identifier but got " + currentToken.tokenIdentifier);
@@ -148,8 +152,10 @@ public class Parser {
 
 	}
 
-	// TODO: Need a better name for this method
 	public void parseExpr() {
+
+		// TODO: Should be calling ParseAssign() at some point, idk where
+		// parseAssign();
 
 		parseMulDiv();
 
@@ -203,10 +209,6 @@ public class Parser {
 
 		if (currentToken.tokenIdentifier.equals("IF_KEYWORD")) {
 
-			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
-
-			advance();
-
 			parseBranch();
 
 		} else if (currentToken.tokenIdentifier.equals("IDENTIFIER")
@@ -214,9 +216,7 @@ public class Parser {
 				|| currentToken.tokenIdentifier.equals("FLOAT_LITERAL")
 				|| currentToken.tokenIdentifier.equals("LEFT_PARANTHESIS")) {
 
-			// parseExpr();
-
-			// advance();
+			parseExpr();
 
 			match("SEMICOLON");
 
@@ -299,9 +299,7 @@ public class Parser {
 
 	public void parseCond() {
 
-		// parseExpr();
-
-		// advance();
+		parseExpr();
 
 		if (currentToken.tokenIdentifier.equals("IS_EQUAL_OPERATOR")
 				|| currentToken.tokenIdentifier.equals("NOT_EQUAL_OPERATOR")
@@ -314,9 +312,7 @@ public class Parser {
 
 			advance();
 
-			// parseExpr();
-
-			// advance();
+			parseExpr();
 
 		} else {
 
@@ -336,13 +332,13 @@ public class Parser {
 
 		advance();
 
-		// parseExpr();
+		parseExpr();
 
 		match("IN_KEYWORD");
 
 		advance();
 
-		// parseExpr();
+		parseExpr();
 
 		match("LEFT_CURLY_BRACKET");
 
@@ -382,7 +378,7 @@ public class Parser {
 
 	public void match(String expectedToken) {
 
-		if (currentToken.tokenIdentifier == expectedToken) {
+		if (currentToken.tokenIdentifier.equals(expectedToken)) {
 
 			System.out.println("Matched: " + expectedToken + " --> " + currentToken.data);
 
@@ -426,11 +422,13 @@ public class Parser {
 
 		for (String line : fileLines) {
 			String[] lineTokens = line.split(" ");
-			tokensTest.add(new Token(lineTokens[0], lineTokens[1]));
+			String identifier = lineTokens[0].trim();
+			String data = lineTokens[1].trim();
+			tokensTest.add(new Token(identifier, data));
 		}
 
 		System.out.println();
-		System.out.println("Token Test: " + tokensTest);
+		// System.out.println("Token Test: " + tokensTest);
 		System.out.println();
 
 		Queue<Token> tokens = new LinkedList<>();
@@ -441,11 +439,22 @@ public class Parser {
 		tokens.add(new Token("COLON", ":"));
 		tokens.add(new Token("I32_KEYWORD", "i32"));
 		tokens.add(new Token("ASSIGNMENT_OPERATOR", "="));
-		// tokens.add(new Token("IDENTIFIER", "x"));
+		tokens.add(new Token("IDENTIFIER", "x"));
 		tokens.add(new Token("SEMICOLON", ";"));
 
-		Parser parser = new Parser(tokens);
+		System.out.println("");
+		System.out.println("//////////////////////////////////////////////////");
+		System.out.println("Parser Test");
+		System.out.println("//////////////////////////////////////////////////");
+		System.out.println("");
+
+		Parser parser = new Parser(tokensTest);
 		parser.parse();
+
+		System.out.println("");
+		System.out.println("//////////////////////////////////////////////////");
+		System.out.println("Parser Test didn't crash!");
+		System.out.println("//////////////////////////////////////////////////");
 	}
 
 }
