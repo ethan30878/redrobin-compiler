@@ -147,6 +147,238 @@ public class Parser {
 
 	}
 
+	// TODO: Need a better name for this method
+	public void parseExpr() {
+
+		parseMulDiv();
+
+		parseExprTail();
+
+	}
+
+	public void parseMulDiv() {
+
+		parseBase();
+
+		parseMulDivTail();
+
+	}
+
+	public void parseMulDivTail() {
+
+		if (currentToken.tokenIdentifier.equals("MULTIPLICATION_OPERATOR")
+				|| currentToken.tokenIdentifier.equals("DIVISION_OPERATOR")) {
+
+			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+
+			advance();
+
+			parseBase();
+
+			parseMulDivTail();
+
+		}
+
+	}
+
+	public void parseExprTail() {
+
+		if (currentToken.tokenIdentifier.equals("ADDITION_OPERATOR")
+				|| currentToken.tokenIdentifier.equals("SUBTRACTION_OPERATOR")) {
+
+			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+
+			advance();
+
+			parseMulDiv();
+
+			parseExprTail();
+
+		}
+
+	}
+
+	public void parseStatement() {
+
+		if (currentToken.tokenIdentifier.equals("IF_KEYWORD")) {
+
+			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+
+			advance();
+
+			parseBranch();
+
+		} else if (currentToken.tokenIdentifier.equals("IDENTIFIER")
+				|| currentToken.tokenIdentifier.equals("INT_LITERAL")
+				|| currentToken.tokenIdentifier.equals("FLOAT_LITERAL")
+				|| currentToken.tokenIdentifier.equals("LEFT_PARANTHESIS")) {
+
+			// parseExpr();
+
+			// advance();
+
+			match("SEMICOLON");
+
+		} else if (currentToken.tokenIdentifier.equals("LET_KEYWORD")) {
+
+			parseDecl();
+
+		} else if (currentToken.tokenIdentifier.equals("FOR_KEYWORD")) {
+
+			parseFor();
+
+		} else if (currentToken.tokenIdentifier.equals("WHILE_KEYWORD")) {
+
+			parseWhile();
+
+		} else {
+
+			parseStatements();
+
+		}
+	}
+
+	public void parseStatements() {
+
+		// TODO: ADD IF FOR START OF ANY PRODUCTION
+		parseStatement();
+
+		// TODO: ELSE THROW ERROR
+
+	}
+
+	public void parseBranch() {
+
+		match("IF_KEYWORD");
+
+		advance();
+
+		match("LEFT_PARANTHESIS");
+
+		advance();
+
+		parseCond();
+
+		match("RIGHT_PARANTHESIS");
+
+		advance();
+
+		match("LEFT_CURLY_BRACKET");
+
+		advance();
+
+		parseStatement();
+
+		match("RIGHT_CURLY_BRACKET");
+
+		parseElse();
+
+	}
+
+	public void parseElse() {
+
+		if (currentToken.tokenIdentifier.equals("ELSE_KEYWORD")) {
+
+			match("ELSE_KEYWORD");
+
+			advance();
+
+			match("LEFT_CURLY_BRACKET");
+
+			advance();
+
+			parseStatement();
+
+			// TODO: NOT INCLUDED IN DOC
+			match("RIGHT_CURLY_BRACKET");
+
+		}
+
+	}
+
+	public void parseCond() {
+
+		// parseExpr();
+
+		// advance();
+
+		if (currentToken.tokenIdentifier.equals("IS_EQUAL_OPERATOR")
+				|| currentToken.tokenIdentifier.equals("NOT_EQUAL_OPERATOR")
+				|| currentToken.tokenIdentifier.equals("LESS_THAN_OPERATOR")
+				|| currentToken.tokenIdentifier.equals("GREATER_THAN_OPERATOR")
+				|| currentToken.tokenIdentifier.equals("LESS_THAN_OR_EQUAL_OPERATOR")
+				|| currentToken.tokenIdentifier.equals("GREATHER_THAN_OR_EQUAL_OPERATOR")) {
+
+			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+
+			advance();
+
+			// parseExpr();
+
+			// advance();
+
+		} else {
+
+			throw new RuntimeException("Error: Expected comparison operator but got " + currentToken.tokenIdentifier);
+
+		}
+
+	}
+
+	public void parseFor() {
+
+		match("FOR_KEYWORD");
+
+		advance();
+
+		match("LEFT_PARANTHESIS");
+
+		advance();
+
+		// parseExpr();
+
+		match("IN_KEYWORD");
+
+		advance();
+
+		// parseExpr();
+
+		match("LEFT_CURLY_BRACKET");
+
+		advance();
+
+		parseStatement();
+
+		match("RIGHT_CURLY_BRACKET");
+
+	}
+
+	public void parseWhile() {
+
+		match("WHILE_KEYWORD");
+
+		advance();
+
+		match("LEFT_PARANTHESIS");
+
+		advance();
+
+		parseCond();
+
+		match("RIGHT_PARANTHESIS");
+
+		advance();
+
+		match("LEFT_CURLY_BRACKET");
+
+		advance();
+
+		parseStatement();
+
+		match("RIGHT_CURLY_BRACKET");
+
+	}
+
 	public void match(String expectedToken) {
 
 		if (currentToken.tokenIdentifier == expectedToken) {
