@@ -435,9 +435,8 @@ public class Parser {
 		// System.out.println("Token Test: " + tokensTest);
 		System.out.println();
 
+		// Test for let statement
 		Queue<Token> letTest = new LinkedList<>();
-
-		// Populate tokens for testing (add sample tokens here)
 		letTest.add(new Token("LET_KEYWORD", "let"));
 		letTest.add(new Token("IDENTIFIER", "id"));
 		letTest.add(new Token("COLON", ":"));
