@@ -75,11 +75,20 @@ public class Parser {
 
 		advance();
 
+		// TODO: NOT INCLUDED IN DOC
+		if (currentToken.tokenIdentifier.equals("MUT_KEYWORD")) {
+
+			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+
+			advance();
+
+		}
+
 		if (currentToken.tokenIdentifier.equals("I32_KEYWORD") || currentToken.tokenIdentifier.equals("I64_KEYWORD")
 				|| currentToken.tokenIdentifier.equals("F32_KEYWORD")
 				|| currentToken.tokenIdentifier.equals("F64_KEYWORD")) {
 
-			System.out.println("Matched: " + currentToken.tokenIdentifier);
+			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
 
 			advance();
 
@@ -426,16 +435,17 @@ public class Parser {
 		// System.out.println("Token Test: " + tokensTest);
 		System.out.println();
 
-		Queue<Token> tokens = new LinkedList<>();
+		Queue<Token> letTest = new LinkedList<>();
 
 		// Populate tokens for testing (add sample tokens here)
-		tokens.add(new Token("LET_KEYWORD", "let"));
-		tokens.add(new Token("IDENTIFIER", "id"));
-		tokens.add(new Token("COLON", ":"));
-		tokens.add(new Token("I32_KEYWORD", "i32"));
-		tokens.add(new Token("ASSIGNMENT_OPERATOR", "="));
-		tokens.add(new Token("IDENTIFIER", "x"));
-		tokens.add(new Token("SEMICOLON", ";"));
+		letTest.add(new Token("LET_KEYWORD", "let"));
+		letTest.add(new Token("IDENTIFIER", "id"));
+		letTest.add(new Token("COLON", ":"));
+		letTest.add(new Token("MUT_KEYWORD", "mut"));
+		letTest.add(new Token("I32_KEYWORD", "i32"));
+		letTest.add(new Token("ASSIGNMENT_OPERATOR", "="));
+		letTest.add(new Token("IDENTIFIER", "x"));
+		letTest.add(new Token("SEMICOLON", ";"));
 
 		System.out.println("");
 		System.out.println("//////////////////////////////////////////////////");
@@ -443,7 +453,7 @@ public class Parser {
 		System.out.println("//////////////////////////////////////////////////");
 		System.out.println("");
 
-		Parser parser = new Parser(tokensTest);
+		Parser parser = new Parser(letTest);
 		parser.parse();
 
 		System.out.println("");
