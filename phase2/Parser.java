@@ -445,7 +445,7 @@ public class Parser {
 
 		// Test to read in txt file
 		Queue<Token> tokensTest = new LinkedList<>();
-		String filename = "phase2/output.txt";
+		String filename = "phase2/ifTest.txt";
 		String[] fileLines = readFileToArray(filename);
 
 		for (String line : fileLines) {
