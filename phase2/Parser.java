@@ -122,6 +122,8 @@ public class Parser {
 
 		match("SEMICOLON");
 
+		advance();
+
 		atoms.add(atom);
 
 	}
@@ -157,9 +159,6 @@ public class Parser {
 	}
 
 	public void parseExpr() {
-
-		// TODO: Should be calling ParseAssign() at some point, idk where
-		// parseAssign();
 
 		parseMulDiv();
 
@@ -220,9 +219,7 @@ public class Parser {
 				|| currentToken.tokenIdentifier.equals("FLOAT_LITERAL")
 				|| currentToken.tokenIdentifier.equals("LEFT_PARANTHESIS")) {
 
-			parseExpr();
-
-			match("SEMICOLON");
+			parseAssign();
 
 		} else if (currentToken.tokenIdentifier.equals("LET_KEYWORD")) {
 
@@ -303,7 +300,18 @@ public class Parser {
 
 	public void parseCond() {
 
-		parseExpr();
+		if (currentToken.tokenIdentifier.equals("IDENTIFIER") || currentToken.tokenIdentifier.equals("INT_LITERAL")
+				|| currentToken.tokenIdentifier.equals("FLOAT_LITERAL")) {
+
+			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+
+			advance();
+
+		} else {
+
+			throw new RuntimeException("Error: Expected expression but got " + currentToken.tokenIdentifier);
+
+		}
 
 		if (currentToken.tokenIdentifier.equals("IS_EQUAL_OPERATOR")
 				|| currentToken.tokenIdentifier.equals("NOT_EQUAL_OPERATOR")
@@ -316,16 +324,28 @@ public class Parser {
 
 			advance();
 
-			parseExpr();
-
 		} else {
 
 			throw new RuntimeException("Error: Expected comparison operator but got " + currentToken.tokenIdentifier);
 
 		}
 
+		if (currentToken.tokenIdentifier.equals("IDENTIFIER") || currentToken.tokenIdentifier.equals("INT_LITERAL")
+				|| currentToken.tokenIdentifier.equals("FLOAT_LITERAL")) {
+
+			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+
+			advance();
+
+		} else {
+
+			throw new RuntimeException("Error: Expected expression but got " + currentToken.tokenIdentifier);
+
+		}
+
 	}
 
+	// TODO: I don't understand RUST FOR loops
 	public void parseFor() {
 
 		match("FOR_KEYWORD");
@@ -336,13 +356,17 @@ public class Parser {
 
 		advance();
 
-		parseExpr();
+		match("IDENTIFIER");
+
+		advance();
 
 		match("IN_KEYWORD");
 
 		advance();
 
-		parseExpr();
+		match("IDENTIFIER");
+
+		advance();
 
 		match("LEFT_CURLY_BRACKET");
 
@@ -452,7 +476,7 @@ public class Parser {
 		System.out.println("//////////////////////////////////////////////////");
 		System.out.println("");
 
-		Parser parser = new Parser(letTest);
+		Parser parser = new Parser(tokensTest);
 		parser.parse();
 
 		System.out.println("");
