@@ -570,7 +570,7 @@ import java.util.Queue;
 			
 				
 			 }
-			 return (new String("TEMPREG" + tempsNeeded));
+			 return (new String("TEMPREG" + (tempsNeeded-1)));
 	
 		 }
 	  
@@ -617,6 +617,17 @@ import java.util.Queue;
 			 letTest.add(new Token("ASSIGNMENT_OPERATOR", "="));
 
 
+			 letTest.add(new Token("LEFT_PARANTHESIS", "("));
+			 letTest.add(new Token("IDENTIFIER", "x"));
+			 letTest.add(new Token("ADDITION_OPERATOR", "+"));
+			 letTest.add(new Token("IDENTIFIER", "y"));
+			 letTest.add(new Token("DIVISION_OPERATOR", "/"));
+			 letTest.add(new Token("IDENTIFIER", "z"));
+			 
+			 letTest.add(new Token("ADDITION_OPERATOR", "+"));
+			 letTest.add(new Token("IDENTIFIER", "i"));
+			 letTest.add(new Token("RIGHT_PARANTHESIS", ")"));
+			 letTest.add(new Token("ADDITION_OPERATOR", "+"));
 			 letTest.add(new Token("IDENTIFIER", "y"));
 			 letTest.add(new Token("MULTIPLICATION_OPERATOR", "*"));
 			 letTest.add(new Token("LEFT_PARANTHESIS", "("));
