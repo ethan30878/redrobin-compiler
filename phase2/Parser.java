@@ -76,11 +76,10 @@ import java.util.Queue;
 			 advance();
 	  
 			 String Ident = match("IDENTIFIER").data;
-			 tempValue++;
-			 String tempVar = "temp" + tempValue;
+			
 	 
-			 String atomString = "(MOV," + tempVar+",,"+Ident+")";
-			 atoms.add(atomString);
+			
+		
 	  
 			 advance();
 	  
@@ -111,8 +110,10 @@ import java.util.Queue;
 	  
 				String yep = parseExpr();
 
-				 System.out.println("YEP IS "+yep);
-
+				
+				String tempReg = createExprAtoms(yep);
+				
+				atoms.add(("MOV("+tempReg+",,"+Ident+")"));
 
 	  
 				 match("SEMICOLON");
@@ -279,7 +280,7 @@ import java.util.Queue;
 				 advance();
 				String yep2 = parseBase();
 				if(operation.equals("*")){
-					 String toRet ="MULT(" + yep2 +","+ yep+")";
+					 String toRet ="MUL(" + yep2 +","+ yep+")";
 					
 					return toRet;
 				} else {
@@ -522,6 +523,56 @@ import java.util.Queue;
 		 public void matchIntLiteral() {
 	  
 		 }
+		 
+		 public String createExprAtoms(String OoOp) {
+			 int tempsNeeded = 0;
+			 
+		
+			
+			 for(int i = 0; i<OoOp.length(); i++) {
+				 if(OoOp.charAt(i) == ')') {
+					 tempsNeeded++;
+				 }
+			 }
+		
+			 
+			 for(int p = 0; p < tempsNeeded; p++) {
+				 int end = 0;
+				 int start = 0;
+				 
+				 for(int i = 0; i<OoOp.length(); i++) {
+					 if(OoOp.charAt(i) == ')') {
+						
+						 end = i;
+						 break;
+					 }
+				 }
+				 
+				 String tempReg = "";
+				 for(int i = end; i>0; i--) {
+					 if(OoOp.charAt(i) == '(') {
+						 start = i;
+						 break;
+					 }
+				 }
+				 
+				String atom = OoOp.substring(start-3, end);
+				
+				tempReg = "TEMPREG"+p;
+				atom +=","+tempReg+")";
+				
+				System.out.println("New String is: "+OoOp);
+				String temp = OoOp.substring(0, start-3) + tempReg+ OoOp.substring(end+1,OoOp.length());
+				OoOp = temp;
+				
+				atoms.add(atom);
+				
+			
+				
+			 }
+			 return (new String("TEMPREG" + tempsNeeded));
+	
+		 }
 	  
 		 public static String[] readFileToArray(String filename) {
 			 ArrayList<String> lines = new ArrayList<>();
@@ -603,7 +654,7 @@ import java.util.Queue;
 			 while(!atoms.isEmpty()){
 			System.out.println(atoms.remove());
 		 }
-		 System.out.println("Vars: "+LHS+" Operations: "+RHS);
+		
 	 }
  
  }
