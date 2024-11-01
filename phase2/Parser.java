@@ -4,13 +4,13 @@
  * Project Name: Parser (Phase 2)
  * File Name: [Parser.java]
  * 
- * Description:
+ * Description: Phase 2 Parser Code
  * 
  * -----------------------------------------------------------------------------
  * Authors: Jordan Dennison, Riley Potter, Matt Chehovin
  * Reviewers: Jee McCloud, Ethan Glenn, Alejandro Santiago-kwon
  * Date Created:  16OCT24
- * Date Last Modified:  2024
+ * Date Last Modified:  1NOV2024
  * **/
 
 import java.io.BufferedReader;
