@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.Stack;
  
  public class Parser {
  
@@ -254,7 +253,10 @@ import java.util.Stack;
 	advance();
 		String yep2 = parseExpr();
 		if(operation.equals("+")){
-			final String toRet = new String("ADD: " + yep2 +","+ yep);
+			final String toRet = new String("ADD(" + yep2 +","+ yep+")");
+			return toRet;
+		} else {
+			String toRet = new String("SUB(" + yep2 +","+ yep+")");
 			return toRet;
 		}
 		
@@ -277,9 +279,13 @@ import java.util.Stack;
 				 advance();
 				String yep2 = parseBase();
 				if(operation.equals("*")){
-					 String toRet ="MULT: " + yep2 +","+ yep;
+					 String toRet ="MULT(" + yep2 +","+ yep+")";
 					
 					return toRet;
+				} else {
+					 String toRet ="DIV(" + yep2 +","+ yep+")";
+						
+						return toRet;
 				}
 			
 		
@@ -560,15 +566,18 @@ import java.util.Stack;
 			 letTest.add(new Token("ASSIGNMENT_OPERATOR", "="));
 
 
+			 letTest.add(new Token("IDENTIFIER", "y"));
+			 letTest.add(new Token("MULTIPLICATION_OPERATOR", "*"));
 			 letTest.add(new Token("LEFT_PARANTHESIS", "("));
 			 letTest.add(new Token("IDENTIFIER", "x"));
 			 letTest.add(new Token("ADDITION_OPERATOR", "+"));
 			 letTest.add(new Token("IDENTIFIER", "y"));
-			 letTest.add(new Token("MULTIPLICATION_OPERATOR", "*"));
+			 letTest.add(new Token("DIVISION_OPERATOR", "/"));
 			 letTest.add(new Token("IDENTIFIER", "z"));
-			 letTest.add(new Token("RIGHT_PARANTHESIS", ")"));
+			 
 			 letTest.add(new Token("ADDITION_OPERATOR", "+"));
 			 letTest.add(new Token("IDENTIFIER", "i"));
+			 letTest.add(new Token("RIGHT_PARANTHESIS", ")"));
 			 letTest.add(new Token("SEMICOLON", ";"));
 	  
   					// "MULTIPLICATION_OPERATOR"
