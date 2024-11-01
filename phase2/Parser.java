@@ -43,8 +43,7 @@ import java.util.Stack;
 	 static Queue<String> atoms = new LinkedList<String>();
 	 static int LHS =0;
 	 static int RHS =0;
-	 static Stack<String> vals = new Stack<>();
-	 static Stack<String> ops = new Stack<>();
+	 
 
 	
 
