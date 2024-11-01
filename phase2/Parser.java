@@ -120,7 +120,7 @@ import java.util.Queue;
 			// System.out.println("YEP IS " + result);
 
 			match("SEMICOLON");
-
+			advance();
 			atoms.add("(MOV,,,,," + result + ", " + Ident + ")");
 
 		}
