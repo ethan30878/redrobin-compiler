@@ -13,7 +13,7 @@
  * Date Last Modified:  2024
  * **/
 
- import java.io.BufferedReader;
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ import java.util.Queue;
 		 }
  
 		 @Override
-		public String toString() {
+		 public String toString() {
 			 return tokenIdentifier + " Data:  " + data;
 		 }
 	 }
@@ -44,30 +44,29 @@ import java.util.Queue;
 	 static int RHS =0;
 	 int destinationLabel = 1;
 
-	
-
-		 private Token currentToken;
-		 int index = 0;
+		private Token currentToken;
+		int index = 0;
 	  
-		 public Parser(Queue<Token> tokens) {
+		public Parser(Queue<Token> tokens) {
 			 this.tokens = tokens;
-		 }
+		}
 	  
-		 private void advance() {
+		private void advance() {
 			 currentToken = tokens.poll();
-		 }
+		}
 	  
-		 public void parse() {
+		public void parse() {
 	  
 			 // Get the first token
 			 currentToken = tokens.poll();
 			 // Start parsing the expression
 			 parseStatement();
 	  
-		 }
+		}
 		 
 		 int tempValue = 0;
-			private void parseDecl() {
+
+		private void parseDecl() {
 
 		match("LET_KEYWORD");
 
@@ -82,53 +81,53 @@ import java.util.Queue;
 
 		advance();
 
-		if (currentToken.tokenIdentifier.equals("COLON")) {
+			if (currentToken.tokenIdentifier.equals("COLON")) {
 
-			match("COLON");
-
-			advance();
-
-			// TODO: NOT INCLUDED IN DOC
-			if (currentToken.tokenIdentifier.equals("MUT_KEYWORD")) {
-
-				System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+				match("COLON");
 
 				advance();
 
-				if (currentToken.tokenIdentifier.equals("I32_KEYWORD")
-						|| currentToken.tokenIdentifier.equals("I64_KEYWORD")
-						|| currentToken.tokenIdentifier.equals("F32_KEYWORD")
-						|| currentToken.tokenIdentifier.equals("F64_KEYWORD")) {
+				// TODO: NOT INCLUDED IN DOC
+				if (currentToken.tokenIdentifier.equals("MUT_KEYWORD")) {
 
 					System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
 
 					advance();
 
-				} else {
-					throw new RuntimeException("Error: Expected type keyword but got " + currentToken.tokenIdentifier);
+					if (currentToken.tokenIdentifier.equals("I32_KEYWORD")
+							|| currentToken.tokenIdentifier.equals("I64_KEYWORD")
+							|| currentToken.tokenIdentifier.equals("F32_KEYWORD")
+							|| currentToken.tokenIdentifier.equals("F64_KEYWORD")) {
+
+						System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+
+						advance();
+
+					} else {
+						throw new RuntimeException("Error: Expected type keyword but got " + currentToken.tokenIdentifier);
+					}
+
 				}
 
 			}
 
+			match("ASSIGNMENT_OPERATOR");
+
+			advance();
+
+			String result = parseExpr();
+
+			// System.out.println("YEP IS " + result);
+
+			match("SEMICOLON");
+
+			atoms.add("(MOV,,,,," + result + ", " + Ident + ")");
+
 		}
-
-		match("ASSIGNMENT_OPERATOR");
-
-		advance();
-
-		String yep = parseExpr();
-
-		System.out.println("YEP IS " + yep);
-
-		match("SEMICOLON");
-
-	}
 
 		 public void parseAssign() {
 	  
-			
-	  
-			 match("IDENTIFIER");
+			 Token id = match("IDENTIFIER");
 	  
 			 advance();
 	  
@@ -136,12 +135,13 @@ import java.util.Queue;
 	  
 			 advance();
 	  
-			 parseExpr();
+			 String result = parseExpr();
 	  
 			 match("SEMICOLON");
 	  
 			 advance();
-	  
+			 
+			 atoms.add("(MOV,,,,," + result + ", " + id + ")");
 			
 		 }
 	  
@@ -349,30 +349,35 @@ import java.util.Queue;
 
 	  
 		 public void parseBranch() {
-	  
-			 match("IF_KEYWORD");
-	  
-			 advance();
-	  
-			 match("LEFT_PARANTHESIS");
-	  
-			 advance();
-	  
-			 parseCond();
-	  
-			 match("RIGHT_PARANTHESIS");
-	  
-			 advance();
-	  
-			 match("LEFT_CURLY_BRACKET");
-	  
-			 advance();
-	  
-			 parseStatement();
-	  
-			 match("RIGHT_CURLY_BRACKET");
-	  
-			 parseElse();
+
+	    	match("IF_KEYWORD");
+	     
+	    	advance();
+	     
+	    	match("LEFT_PARANTHESIS");
+	     
+	    	advance();
+	    	int destCount = parseCond(); 
+	    	String condLabel = "L" + destCount;
+	     
+	    	match("RIGHT_PARANTHESIS");
+	     
+	    	advance();
+	     
+	    	match("LEFT_CURLY_BRACKET");
+	     
+	    	advance();
+	     
+	    	parseStatement();
+	     
+	    	match("RIGHT_CURLY_BRACKET");
+			String endLabel = "L" + (destCount + 1);	
+	    	atoms.add("(JMP,,,,," + endLabel + ")"); 
+			atoms.add("(LBL,,,,," + condLabel + ")");
+	    	parseElse();
+
+			atoms.add("(LBL,,,,," + endLabel + ")");
+
 	  
 		 }
 	  
