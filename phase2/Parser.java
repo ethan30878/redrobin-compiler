@@ -755,18 +755,18 @@ public class Parser {
 		forTest.add(new Token("RIGHT_CURLY_BRACKET", "}"));
 
 		System.out.println("");
-		System.out.println("//////////////////////////////////////////////////");
-		System.out.println("PARSER TEST");
-		System.out.println("//////////////////////////////////////////////////");
+		System.out.println("/////////////////////////////////////////////");
+		System.out.println("		PARSER");
+		System.out.println("/////////////////////////////////////////////");
 		System.out.println("");
 
 		Parser parser = new Parser(forTest);
 		parser.parse();
 
 		System.out.println("");
-		System.out.println("//////////////////////////////////////////////////");
-		System.out.println("ATOMS TEST");
-		System.out.println("//////////////////////////////////////////////////");
+		System.out.println("/////////////////////////////////////////////");
+		System.out.println("		ATOMS");
+		System.out.println("/////////////////////////////////////////////");
 		System.out.println("");
 
 		while (!atoms.isEmpty()) {
