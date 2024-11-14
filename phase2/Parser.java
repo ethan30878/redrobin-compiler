@@ -76,8 +76,8 @@ public class Parser {
 		tempValue++;
 		String tempVar = "temp" + tempValue;
 
-		String atomString = "(MOV," + tempVar + ",," + Ident + ")";
-		atoms.add(atomString);
+		// String atomString = "(MOV," + tempVar + ",," + Ident + ")";
+		// atoms.add(atomString);
 
 		advance();
 
@@ -596,6 +596,7 @@ public class Parser {
 		} else {
 
 			System.out.println("Error: Expected " + expectedToken + " but got " + currentToken.tokenIdentifier);
+			System.exit(0);
 			return null;
 		}
 
@@ -640,7 +641,7 @@ public class Parser {
 
 			String atom = OoOp.substring(start, end);
 
-			tempReg = "TEMPREG" + p;
+			tempReg = "t" + p;
 			atom += "," + tempReg + ")";
 
 			System.out.println("New String is: " + OoOp);
@@ -650,7 +651,7 @@ public class Parser {
 			atoms.add(atom);
 
 		}
-		return (new String("TEMPREG" + (tempsNeeded - 1)));
+		return (new String("t" + (tempsNeeded - 1)));
 
 	}
 
@@ -760,7 +761,7 @@ public class Parser {
 		System.out.println("/////////////////////////////////////////////");
 		System.out.println("");
 
-		Parser parser = new Parser(forTest);
+		Parser parser = new Parser(whileTest);
 		parser.parse();
 
 		System.out.println("");
