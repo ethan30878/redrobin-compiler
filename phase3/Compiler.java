@@ -70,6 +70,7 @@ public class Compiler {
         String filename = "phase3/test.txt";
         String[] fileLines = readFileToArray(filename);
         ArrayList<String> atoms = new ArrayList<String>();
+        ArrayList<String> binOut = new ArrayList<String>();
 
         for (String line : fileLines) {
             atoms.add(line);
@@ -78,27 +79,25 @@ public class Compiler {
         for (String atom : atoms) {
 
             if (atom.substring(1, 4).equals("CLR")) {
-                System.out.println("Label Found");
-                clrConv(atom);
+                binOut.add(clrConv(atom));
             } else if (atom.substring(1, 4).equals("ADD")) {
-                System.out.println("ADD Found");
-                addConv(atom);
+                binOut.add(addConv(atom));
             } else if (atom.substring(1, 4).equals("SUB")) {
-                subConv(atom);
+                binOut.add(subConv(atom));
             } else if (atom.substring(1, 4).equals("MUL")) {
-                mulConv(atom);
+                binOut.add(mulConv(atom));
             } else if (atom.substring(1, 4).equals("DIV")) {
-                divConv(atom);
+                binOut.add(divConv(atom));
             } else if (atom.substring(1, 4).equals("JMP")) {
-                jmpConv(atom);
+                binOut.add(jmpConv(atom));
             } else if (atom.substring(1, 4).equals("CMP")) {
-                cmpConv(atom);
+                binOut.add(cmpConv(atom));
             } else if (atom.substring(1, 4).equals("LOD")) {
-                lodConv(atom);
+                binOut.add(lodConv(atom));
             } else if (atom.substring(1, 4).equals("STO")) {
-                stoConv(atom);
+                binOut.add(stoConv(atom));
             } else if (atom.substring(1, 4).equals("HLT")) {
-                hltConv(atom);
+                binOut.add(hltConv(atom));
             }
         }
 
