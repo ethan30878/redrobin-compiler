@@ -1,3 +1,4 @@
+
 /**
  * -----------------------------------------------------------------------------
  * Project Name: Parser (Phase 2)
@@ -461,7 +462,7 @@ public class Parser {
 
 		}
 
-		String atomString = "(TST, " + leftOp + "," + rightOp + ",," + operator + "," + destLbl + ")";
+		String atomString = "(TST," + leftOp + "," + rightOp + ",," + operator + "," + destLbl + ")";
 		atoms.add(atomString);
 
 		return destCount;
@@ -523,7 +524,7 @@ public class Parser {
 		atomString = "(LBL,,,,," + topLabel + ")";
 		atoms.add(atomString);
 
-		atomString = "(TST, " + counterVar + ", " + end + ",, " + 5 + ", " + endLabel + ")";
+		atomString = "(TST," + counterVar + ", " + end + ",, " + 5 + ", " + endLabel + ")";
 		atoms.add(atomString);
 
 		parseStatement();
@@ -760,7 +761,7 @@ public class Parser {
 		System.out.println("/////////////////////////////////////////////");
 		System.out.println("");
 
-		Parser parser = new Parser(whileTest);
+		Parser parser = new Parser(forTest);
 		parser.parse();
 
 		System.out.println("");
