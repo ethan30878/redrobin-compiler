@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Stack;
 
 public class Compiler {
 
@@ -49,6 +50,25 @@ public class Compiler {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    static void decimalToBinary(int num) {
+
+        Stack<Integer> st = new Stack<>();
+        String binary = "";
+
+        while (num > 0) {
+
+            st.push(num % 2);
+            num = num / 2;
+        }
+
+        while (!(st.isEmpty())) {
+
+            binary += st.pop().toString();
+        }
+
+        System.out.println(binary);
+    }
+
     public static String[] readFileToArray(String filename) {
         ArrayList<String> lines = new ArrayList<>();
 
@@ -72,6 +92,8 @@ public class Compiler {
         ArrayList<String> atoms = new ArrayList<String>();
         ArrayList<String> binOut = new ArrayList<String>();
 
+        decimalToBinary(45);
+
         for (String line : fileLines) {
             atoms.add(line);
         }
@@ -79,25 +101,35 @@ public class Compiler {
         for (String atom : atoms) {
 
             if (atom.substring(1, 4).equals("CLR")) {
-                binOut.add(clrConv(atom));
+                // binOut.add(clrConv(atom));
+                System.out.println("CLR");
             } else if (atom.substring(1, 4).equals("ADD")) {
-                binOut.add(addConv(atom));
+                // binOut.add(addConv(atom));
+                System.out.println("ADD");
             } else if (atom.substring(1, 4).equals("SUB")) {
-                binOut.add(subConv(atom));
+                // binOut.add(subConv(atom));
+                System.out.println("SUB");
             } else if (atom.substring(1, 4).equals("MUL")) {
-                binOut.add(mulConv(atom));
+                // binOut.add(mulConv(atom));
+                System.out.println("MUL");
             } else if (atom.substring(1, 4).equals("DIV")) {
-                binOut.add(divConv(atom));
+                // binOut.add(divConv(atom));
+                System.out.println("DIV");
             } else if (atom.substring(1, 4).equals("JMP")) {
-                binOut.add(jmpConv(atom));
+                // binOut.add(jmpConv(atom));
+                System.out.println("JMP");
             } else if (atom.substring(1, 4).equals("CMP")) {
-                binOut.add(cmpConv(atom));
+                // binOut.add(cmpConv(atom));
+                System.out.println("CMP");
             } else if (atom.substring(1, 4).equals("LOD")) {
-                binOut.add(lodConv(atom));
+                // binOut.add(lodConv(atom));
+                System.out.println("LOD");
             } else if (atom.substring(1, 4).equals("STO")) {
-                binOut.add(stoConv(atom));
+                // binOut.add(stoConv(atom));
+                System.out.println("STO");
             } else if (atom.substring(1, 4).equals("HLT")) {
-                binOut.add(hltConv(atom));
+                // binOut.add(hltConv(atom));
+                System.out.println("HLT");
             }
         }
 
