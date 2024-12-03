@@ -10,6 +10,7 @@ public class Compiler {
 
     // Flag for cmp, false by default
     private static boolean flag = false;
+    public static int regVal = 0;
 
     /**
      * Author: Ethan Glenn
@@ -32,66 +33,59 @@ public class Compiler {
      */
     public static String addConv(String input) {
 
-        String address1 = "0000";
-        String address2 = "00000000000000000000";
-        String r = "0000";
+        String returnString = "";
+        String mem1 = "[ default mem 1 ]";
+        String mem2 = "[ default mem 2 ]";
+        String r = "[ 0000 ]";
 
-        String opcode = "[ 0001 ]";
+        String opcodeADD = "[ 0001 ]";
+        String opcodeSTO = "[ 1000 ]";
         String cmp = "[ 0000 ]";
 
         String[] splitInput = input.split(",");
 
+        System.out.println("splitInput1: " + splitInput[1]);
+        System.out.println("splitInput2: " + splitInput[2]);
+        System.out.println("splitInput3: " + splitInput[3].substring(0, splitInput[3].length() - 1));
+        System.out.println();
+
+        // Check the memory location of the first value
         if (splitInput[1].startsWith("t")) {
 
-            int regLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))).length();
+            returnString += "{STORE} Load in Mem1 Register Value to Memory:\n" + opcodeSTO + cmp
+                    + "[ Register for Mem1 ]"
+                    + "[ Value at Mem1 ]" + "\n";
 
-            r = "[ " + address1.substring(regLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))) + " ]";
-        } else if (splitInput[1].matches("\\d+")) {
-            int regLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))).length();
-
-            r = "[ " + address1.substring(regLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))) + " ]";
+            mem1 = "[ Register of Mem1: " + splitInput[1] + " ]";
 
         } else {
-            r = "[ Address of " + splitInput[1] + " ]";
-        }
 
-        if (splitInput[2].startsWith("t")) {
+            mem1 = "[ Value of: " + splitInput[1] + " ]";
 
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))).length();
-            address1 = "[ " + address1.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))) + " ]";
-
-        } else if (splitInput[2].matches("\\d+")) {
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))).length();
-            address1 = "[ " + address1.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))) + " ]";
-        } else {
-            address1 = "[ address of " + splitInput[2] + " ]";
         }
 
         if (splitInput[3].startsWith("t")) {
 
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))).length();
-            address2 = "[ " + address2.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))) + " ]";
+            r = "[ Register to Store In: " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
 
-        } else if (splitInput[3].matches("\\d+")) {
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))).length();
-            address2 = "[ " + address2.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))) + " ]";
         } else {
-            address2 = "[ address of " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
+
+            r = "[ Not a Valid Register ]";
+
         }
 
-        return opcode + cmp + r + address2 + "\n" + opcode + cmp + address1 + address2;
+        if (!splitInput[3].substring(0, splitInput[3].length() - 1).equals(splitInput[2])) {
+
+            returnString += "{STORE} Load in Mem2 Register Value to Memory:\n" + opcodeSTO + cmp
+                    + "[ Register for Mem2 ]"
+                    + "[ Value at Mem2 ]" + "\n";
+
+        } else {
+
+            returnString += "{ADD} Add Values:\n" + opcodeADD + cmp + mem2 + mem1 + "\n";
+        }
+
+        return returnString;
     }
 
     /**
@@ -101,8 +95,8 @@ public class Compiler {
      * @return binary instruction
      */
     public static String subConv(String input) {
-        String address1 = "0000";
-        String address2 = "00000000000000000000";
+        String mem1 = "00000000000000000000";
+        String mem2 = "00000000000000000000";
         String r = "0000";
 
         String opcode = "[ 0010 ]";
@@ -115,13 +109,13 @@ public class Compiler {
             int regLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))).length();
 
-            r = "[ " + address1.substring(regLength) + Integer
+            r = "[ " + mem1.substring(regLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))) + " ]";
         } else if (splitInput[1].matches("\\d+")) {
             int regLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))).length();
 
-            r = "[ " + address1.substring(regLength) + Integer
+            r = "[ " + mem1.substring(regLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))) + " ]";
 
         } else {
@@ -132,35 +126,35 @@ public class Compiler {
 
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))).length();
-            address1 = "[ " + address1.substring(addressLength) + Integer
+            mem1 = "[ " + mem1.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))) + " ]";
 
         } else if (splitInput[2].matches("\\d+")) {
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))).length();
-            address1 = "[ " + address1.substring(addressLength) + Integer
+            mem1 = "[ " + mem1.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))) + " ]";
         } else {
-            address1 = "[ address of " + splitInput[2] + " ]";
+            mem1 = "[ address of " + splitInput[2] + " ]";
         }
 
         if (splitInput[3].startsWith("t")) {
 
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))).length();
-            address2 = "[ " + address2.substring(addressLength) + Integer
+            mem2 = "[ " + mem2.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))) + " ]";
 
         } else if (splitInput[3].matches("\\d+")) {
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))).length();
-            address2 = "[ " + address2.substring(addressLength) + Integer
+            mem2 = "[ " + mem2.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))) + " ]";
         } else {
-            address2 = "[ address of " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
+            mem2 = "[ address of " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
         }
 
-        return opcode + cmp + r + address2 + "\n" + opcode + cmp + address1 + address2;
+        return opcode + cmp + r + mem2 + "\n" + opcode + cmp + mem1 + mem2;
     }
 
     /**
@@ -170,8 +164,8 @@ public class Compiler {
      * @return binary instruction
      */
     public static String mulConv(String input) {
-        String address1 = "0000";
-        String address2 = "00000000000000000000";
+        String mem1 = "00000000000000000000";
+        String mem2 = "00000000000000000000";
         String r = "0000";
 
         String opcode = "[ 0011 ]";
@@ -184,13 +178,13 @@ public class Compiler {
             int regLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))).length();
 
-            r = "[ " + address1.substring(regLength) + Integer
+            r = "[ " + mem1.substring(regLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))) + " ]";
         } else if (splitInput[1].matches("\\d+")) {
             int regLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))).length();
 
-            r = "[ " + address1.substring(regLength) + Integer
+            r = "[ " + mem1.substring(regLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))) + " ]";
 
         } else {
@@ -201,35 +195,35 @@ public class Compiler {
 
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))).length();
-            address1 = "[ " + address1.substring(addressLength) + Integer
+            mem1 = "[ " + mem1.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))) + " ]";
 
         } else if (splitInput[2].matches("\\d+")) {
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))).length();
-            address1 = "[ " + address1.substring(addressLength) + Integer
+            mem1 = "[ " + mem1.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))) + " ]";
         } else {
-            address1 = "[ address of " + splitInput[2] + " ]";
+            mem1 = "[ address of " + splitInput[2] + " ]";
         }
 
         if (splitInput[3].startsWith("t")) {
 
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))).length();
-            address2 = "[ " + address2.substring(addressLength) + Integer
+            mem2 = "[ " + mem2.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))) + " ]";
 
         } else if (splitInput[3].matches("\\d+")) {
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))).length();
-            address2 = "[ " + address2.substring(addressLength) + Integer
+            mem2 = "[ " + mem2.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))) + " ]";
         } else {
-            address2 = "[ address of " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
+            mem2 = "[ address of " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
         }
 
-        return opcode + cmp + r + address2 + "\n" + opcode + cmp + address1 + address2;
+        return opcode + cmp + r + mem2 + "\n" + opcode + cmp + mem1 + mem2;
     }
 
     /**
@@ -239,8 +233,8 @@ public class Compiler {
      * @return binary instruction
      */
     public static String divConv(String input) {
-        String address1 = "0000";
-        String address2 = "00000000000000000000";
+        String mem1 = "00000000000000000000";
+        String mem2 = "00000000000000000000";
         String r = "0000";
 
         String opcode = "[ 0100 ]";
@@ -253,13 +247,13 @@ public class Compiler {
             int regLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))).length();
 
-            r = "[ " + address1.substring(regLength) + Integer
+            r = "[ " + mem1.substring(regLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))) + " ]";
         } else if (splitInput[1].matches("\\d+")) {
             int regLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))).length();
 
-            r = "[ " + address1.substring(regLength) + Integer
+            r = "[ " + mem1.substring(regLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))) + " ]";
 
         } else {
@@ -270,35 +264,35 @@ public class Compiler {
 
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))).length();
-            address1 = "[ " + address1.substring(addressLength) + Integer
+            mem1 = "[ " + mem1.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))) + " ]";
 
         } else if (splitInput[2].matches("\\d+")) {
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))).length();
-            address1 = "[ " + address1.substring(addressLength) + Integer
+            mem1 = "[ " + mem1.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))) + " ]";
         } else {
-            address1 = "[ address of " + splitInput[2] + " ]";
+            mem1 = "[ address of " + splitInput[2] + " ]";
         }
 
         if (splitInput[3].startsWith("t")) {
 
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))).length();
-            address2 = "[ " + address2.substring(addressLength) + Integer
+            mem2 = "[ " + mem2.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))) + " ]";
 
         } else if (splitInput[3].matches("\\d+")) {
             int addressLength = Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))).length();
-            address2 = "[ " + address2.substring(addressLength) + Integer
+            mem2 = "[ " + mem2.substring(addressLength) + Integer
                     .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))) + " ]";
         } else {
-            address2 = "[ address of " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
+            mem2 = "[ address of " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
         }
 
-        return opcode + cmp + r + address2 + "\n" + opcode + cmp + address1 + address2;
+        return opcode + cmp + r + mem2 + "\n" + opcode + cmp + mem1 + mem2;
     }
 
     /**
@@ -416,13 +410,13 @@ public class Compiler {
                 System.out.println(addConv(atom));
             } else if (atom.substring(1, 4).equals("SUB")) {
                 // binOut.add(subConv(atom));
-                System.out.println(subConv(atom));
+                // System.out.println(subConv(atom));
             } else if (atom.substring(1, 4).equals("MUL")) {
                 // binOut.add(mulConv(atom));
-                System.out.println(mulConv(atom));
+                // System.out.println(mulConv(atom));
             } else if (atom.substring(1, 4).equals("DIV")) {
                 // binOut.add(divConv(atom));
-                System.out.println(divConv(atom));
+                // System.out.println(divConv(atom));
             } else if (atom.substring(1, 4).equals("JMP")) {
                 // binOut.add(jmpConv(atom));
                 System.out.println("JMP");
