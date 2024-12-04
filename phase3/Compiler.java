@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public class Compiler {
@@ -11,6 +12,7 @@ public class Compiler {
     // Flag for cmp, false by default
     private static boolean flag = false;
     public static int regVal = 0;
+    public static List<List<String>> fixupTable = new ArrayList<>();
 
     /**
      * Author: Ethan Glenn
@@ -31,16 +33,7 @@ public class Compiler {
      * @param input input atom
      * @return binary instruction
      */
-    public static String addConv(String input) {
-
-        String returnString = "";
-        String mem1 = "[ default mem 1 ]";
-        String mem2 = "[ default mem 2 ]";
-        String r = "[ 0000 ]";
-
-        String opcodeADD = "[ 0001 ]";
-        String opcodeSTO = "[ 1000 ]";
-        String cmp = "[ 0000 ]";
+    public static String movConv(String input) {
 
         String[] splitInput = input.split(",");
 
@@ -49,40 +42,96 @@ public class Compiler {
         System.out.println("splitInput3: " + splitInput[3].substring(0, splitInput[3].length() - 1));
         System.out.println();
 
-        // Check the memory location of the first value
-        if (splitInput[1].startsWith("t")) {
+        return "Mov Temp";
+    }
 
-            returnString += "{STORE} Load in Mem1 Register Value to Memory:\n" + opcodeSTO + cmp
-                    + "[ Register for Mem1 ]"
-                    + "[ Value at Mem1 ]" + "\n";
+    /**
+     * Author: Jordan Dennison
+     * 
+     * @param input input atom
+     * @return binary instruction
+     */
+    public static String addConv(String input) {
 
-            mem1 = "[ Register of Mem1: " + splitInput[1] + " ]";
+        String returnString = "";
 
-        } else {
+        String opcodeADD = "[ 0001 ]";
+        String opcodeSTO = "[ 1000 ]";
+        String cmp = "[ 0000 ]";
 
-            mem1 = "[ Value of: " + splitInput[1] + " ]";
+        String[] splitInput = input.split(",");
 
+        // System.out.println("splitInput1: " + splitInput[1]);
+        // System.out.println("splitInput2: " + splitInput[2]);
+        // System.out.println("splitInput3: " + splitInput[3].substring(0,
+        // splitInput[3].length() - 1));
+        // System.out.println();
+
+        // Check the first input
+        try {
+            int input1 = Integer.parseInt(splitInput[1]);
+            System.out.println(
+                    input1 + " is a valid integer number");
+
+            // If it is an integer, we need to store it in the table?
+            // Or convert it straight to binary if that works? (Reaser did not explain)
+
+        } catch (NumberFormatException e) {
+            System.out.println(
+                    splitInput[1] + " is a variable name");
+
+            // Find the address
+            for (List<String> row : fixupTable) {
+                if (row.get(0).equals(splitInput[1])) {
+                    System.out.println("FOUND: " + row);
+                }
+            }
+
+            // If it is a variable name, we need to check the table for its value
         }
 
-        if (splitInput[3].startsWith("t")) {
+        // Check the second input
+        try {
+            int input2 = Integer.parseInt(splitInput[2]);
+            System.out.println(
+                    input2 + " is a valid integer number");
 
-            r = "[ Register to Store In: " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
+            // If it is an integer, we need to store it in the table?
+            // Or convert it straight to binary if that works? (Reaser did not explain)
 
-        } else {
+        } catch (NumberFormatException e) {
+            System.out.println(
+                    splitInput[2] + " is a variable name");
 
-            r = "[ Not a Valid Register ]";
-
+            // Find the address
+            for (List<String> row : fixupTable) {
+                if (row.get(0).equals(splitInput[2])) {
+                    System.out.println("FOUND: " + row);
+                }
+            }
         }
 
-        if (!splitInput[3].substring(0, splitInput[3].length() - 1).equals(splitInput[2])) {
+        // Check the third input
+        try {
+            int input3 = Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1));
+            System.out.println(
+                    input3 + " is a valid integer number");
 
-            returnString += "{STORE} Load in Mem2 Register Value to Memory:\n" + opcodeSTO + cmp
-                    + "[ Register for Mem2 ]"
-                    + "[ Value at Mem2 ]" + "\n";
+            // If it is an integer, we need to store it in the table?
+            // Or convert it straight to binary if that works? (Reaser did not explain)
 
-        } else {
+        } catch (NumberFormatException e) {
+            System.out.println(
+                    splitInput[3].substring(0, splitInput[3].length() - 1) + " is a variable name");
 
-            returnString += "{ADD} Add Values:\n" + opcodeADD + cmp + mem2 + mem1 + "\n";
+            // If it is a variable name, we need to check the table for its value
+            // Find the address
+            for (List<String> row : fixupTable) {
+                if (row.get(0).equals(splitInput[3].substring(0, splitInput[3].length() - 1))) {
+                    System.out.println("FOUND: " + row);
+                }
+            }
+
         }
 
         return returnString;
@@ -95,66 +144,8 @@ public class Compiler {
      * @return binary instruction
      */
     public static String subConv(String input) {
-        String mem1 = "00000000000000000000";
-        String mem2 = "00000000000000000000";
-        String r = "0000";
 
-        String opcode = "[ 0010 ]";
-        String cmp = "[ 0000 ]";
-
-        String[] splitInput = input.split(",");
-
-        if (splitInput[1].startsWith("t")) {
-
-            int regLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))).length();
-
-            r = "[ " + mem1.substring(regLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))) + " ]";
-        } else if (splitInput[1].matches("\\d+")) {
-            int regLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))).length();
-
-            r = "[ " + mem1.substring(regLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))) + " ]";
-
-        } else {
-            r = "[ Address of " + splitInput[1] + " ]";
-        }
-
-        if (splitInput[2].startsWith("t")) {
-
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))).length();
-            mem1 = "[ " + mem1.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))) + " ]";
-
-        } else if (splitInput[2].matches("\\d+")) {
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))).length();
-            mem1 = "[ " + mem1.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))) + " ]";
-        } else {
-            mem1 = "[ address of " + splitInput[2] + " ]";
-        }
-
-        if (splitInput[3].startsWith("t")) {
-
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))).length();
-            mem2 = "[ " + mem2.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))) + " ]";
-
-        } else if (splitInput[3].matches("\\d+")) {
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))).length();
-            mem2 = "[ " + mem2.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))) + " ]";
-        } else {
-            mem2 = "[ address of " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
-        }
-
-        return opcode + cmp + r + mem2 + "\n" + opcode + cmp + mem1 + mem2;
+        return "NEED TO FIX";
     }
 
     /**
@@ -164,66 +155,7 @@ public class Compiler {
      * @return binary instruction
      */
     public static String mulConv(String input) {
-        String mem1 = "00000000000000000000";
-        String mem2 = "00000000000000000000";
-        String r = "0000";
-
-        String opcode = "[ 0011 ]";
-        String cmp = "[ 0000 ]";
-
-        String[] splitInput = input.split(",");
-
-        if (splitInput[1].startsWith("t")) {
-
-            int regLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))).length();
-
-            r = "[ " + mem1.substring(regLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))) + " ]";
-        } else if (splitInput[1].matches("\\d+")) {
-            int regLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))).length();
-
-            r = "[ " + mem1.substring(regLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))) + " ]";
-
-        } else {
-            r = "[ Address of " + splitInput[1] + " ]";
-        }
-
-        if (splitInput[2].startsWith("t")) {
-
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))).length();
-            mem1 = "[ " + mem1.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))) + " ]";
-
-        } else if (splitInput[2].matches("\\d+")) {
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))).length();
-            mem1 = "[ " + mem1.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))) + " ]";
-        } else {
-            mem1 = "[ address of " + splitInput[2] + " ]";
-        }
-
-        if (splitInput[3].startsWith("t")) {
-
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))).length();
-            mem2 = "[ " + mem2.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))) + " ]";
-
-        } else if (splitInput[3].matches("\\d+")) {
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))).length();
-            mem2 = "[ " + mem2.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))) + " ]";
-        } else {
-            mem2 = "[ address of " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
-        }
-
-        return opcode + cmp + r + mem2 + "\n" + opcode + cmp + mem1 + mem2;
+        return "NEED TO FIX";
     }
 
     /**
@@ -233,66 +165,7 @@ public class Compiler {
      * @return binary instruction
      */
     public static String divConv(String input) {
-        String mem1 = "00000000000000000000";
-        String mem2 = "00000000000000000000";
-        String r = "0000";
-
-        String opcode = "[ 0100 ]";
-        String cmp = "[ 0000 ]";
-
-        String[] splitInput = input.split(",");
-
-        if (splitInput[1].startsWith("t")) {
-
-            int regLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))).length();
-
-            r = "[ " + mem1.substring(regLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(1, splitInput[1].length()))) + " ]";
-        } else if (splitInput[1].matches("\\d+")) {
-            int regLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))).length();
-
-            r = "[ " + mem1.substring(regLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[1].substring(0, splitInput[1].length()))) + " ]";
-
-        } else {
-            r = "[ Address of " + splitInput[1] + " ]";
-        }
-
-        if (splitInput[2].startsWith("t")) {
-
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))).length();
-            mem1 = "[ " + mem1.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(1, splitInput[2].length()))) + " ]";
-
-        } else if (splitInput[2].matches("\\d+")) {
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))).length();
-            mem1 = "[ " + mem1.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[2].substring(0, splitInput[2].length()))) + " ]";
-        } else {
-            mem1 = "[ address of " + splitInput[2] + " ]";
-        }
-
-        if (splitInput[3].startsWith("t")) {
-
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))).length();
-            mem2 = "[ " + mem2.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(1, splitInput[3].length() - 1))) + " ]";
-
-        } else if (splitInput[3].matches("\\d+")) {
-            int addressLength = Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))).length();
-            mem2 = "[ " + mem2.substring(addressLength) + Integer
-                    .toBinaryString(Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1))) + " ]";
-        } else {
-            mem2 = "[ address of " + splitInput[3].substring(0, splitInput[3].length() - 1) + " ]";
-        }
-
-        return opcode + cmp + r + mem2 + "\n" + opcode + cmp + mem1 + mem2;
+        return "NEED TO FIX";
     }
 
     /**
@@ -386,6 +259,47 @@ public class Compiler {
         return lines.toArray(new String[0]);
     }
 
+    public static void createFixupTable(ArrayList<String> atoms) {
+
+        int address = 200;
+
+        for (String atom : atoms) {
+
+            String[] splitInput = atom.split(",");
+
+            if (atom.substring(1, 4).equals("LBL")) {
+
+                // Get the label name and address
+                String labelName = atom.substring(9, 11);
+                String addr = String.valueOf(address);
+                address += 4;
+
+                // Add into the array
+                List<String> addresses = new ArrayList<>();
+                addresses.add(labelName);
+                addresses.add(addr);
+                fixupTable.add(addresses);
+            }
+
+            if (atom.substring(1, 4).equals("MOV")) {
+
+                // Get the label name and address
+                String labelName = splitInput[5].substring(0, splitInput[5].length() - 1);
+                String addr = String.valueOf(address);
+                String value = splitInput[1];
+                address += 4;
+
+                // Add into the array
+                List<String> addresses = new ArrayList<>();
+                addresses.add(labelName);
+                addresses.add(value);
+                addresses.add(addr);
+
+                fixupTable.add(addresses);
+            }
+        }
+    }
+
     public static void main(String[] args) {
 
         // Test to read in txt file
@@ -397,6 +311,16 @@ public class Compiler {
         for (String line : fileLines) {
             atoms.add(line);
         }
+
+        // Create something to store labels and variables
+        createFixupTable(atoms);
+
+        System.out.println("Fixup Table:");
+
+        for (List<String> item : fixupTable)
+            System.out.println(item);
+
+        System.out.println();
 
         for (String atom : atoms) {
             // TODO: Convert atoms to their respective instructions
@@ -432,6 +356,9 @@ public class Compiler {
             } else if (atom.substring(1, 4).equals("HLT")) {
                 // binOut.add(hltConv(atom));
                 System.out.println("HLT");
+            } else if (atom.substring(1, 4).equals("MOV")) {
+                // binOut.add(movConv(atom));
+                // System.out.println("MOV");
             }
         }
 
