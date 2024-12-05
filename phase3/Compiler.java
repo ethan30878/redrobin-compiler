@@ -9,9 +9,6 @@ import java.util.Stack;
 
 public class Compiler {
 
-    // Flag for cmp, false by default
-    private static boolean flag = false;
-
     // Variables for the compiler
     public static int fpreg = 0;
     public static int lblAdress = 100;
@@ -22,15 +19,14 @@ public class Compiler {
     /**
      * Author: Ethan Glenn
      * 
-     * @param reg register to be cleared
-     * @return binary instruction
+     * @param mem register address to be cleared
      */
-    public static String clrConv(String input) {
+    public static void clrConv(String mem) {
         String opcode = "0101";
         String cmp = "0000";
-        String reg = input.substring(7, 11);
-        String addr = input.substring(11, input.length() - 1);
-        return opcode + cmp + reg + addr;
+        String reg = lodConv(mem);
+
+        binOut.add("CLR -> " + opcode + "/" + cmp + "/" + decimalToBinary(Integer.parseInt(reg)) + "/" + mem);
     }
 
     /**
@@ -696,7 +692,7 @@ public class Compiler {
             // ex: MOV, TST, LBL (?), CMP are not atoms, but instructions
 
             if (atom.substring(1, 4).equals("CLR")) {
-                binOut.add(clrConv(atom));
+                // binOut.add(clrConv(atom));
             } else if (atom.substring(1, 4).equals("ADD")) {
                 binOut.add(addConv(atom));
             } else if (atom.substring(1, 4).equals("SUB")) {
