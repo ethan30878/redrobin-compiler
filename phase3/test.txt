@@ -5,7 +5,7 @@
 (TST,y,15,,5,L2)
 (DIV,y,z,t0)
 (ADD,i,t0,t1)
-(MUL,t2,y,t0)
+(MUL,t1,y,t0)
 (MOV,t0,,,,id)
 (ADD,y,-1,y)
 (JMP,,,,,L1)

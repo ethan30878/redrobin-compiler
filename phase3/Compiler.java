@@ -11,8 +11,13 @@ public class Compiler {
 
     // Flag for cmp, false by default
     private static boolean flag = false;
-    public static int regVal = 0;
+
+    // Variables for the compiler
+    public static int fpreg = 0;
+    public static int lblAdress = 100;
     public static List<List<String>> fixupTable = new ArrayList<>();
+    public static List<List<String>> labelTable = new ArrayList<>();
+    public static List<String> binOut = new ArrayList<>();
 
     /**
      * Author: Ethan Glenn
@@ -33,16 +38,30 @@ public class Compiler {
      * @param input input atom
      * @return binary instruction
      */
-    public static String movConv(String input) {
+    public static void movConv(String input) {
 
         String[] splitInput = input.split(",");
 
-        System.out.println("splitInput1: " + splitInput[1]);
-        System.out.println("splitInput2: " + splitInput[2]);
-        System.out.println("splitInput3: " + splitInput[3].substring(0, splitInput[3].length() - 1));
-        System.out.println();
+        String mem1 = splitInput[5].substring(0, splitInput[5].length() - 1);
+        String reg = "";
 
-        return "Mov Temp";
+        String opcode = "1000";
+        String cmp = "0000";
+
+        // Find the address
+        for (List<String> row : labelTable) {
+            if (row.get(0).equals(mem1)) {
+
+                mem1 = row.get(2);
+
+                reg = lodConv(mem1);
+
+            }
+        }
+
+        reg = decimalToBinary(Integer.parseInt(reg));
+
+        binOut.add("MOV -> " + opcode + "/" + cmp + "/" + reg + "/" + splitInput[1]);
     }
 
     /**
@@ -53,37 +72,43 @@ public class Compiler {
      */
     public static String addConv(String input) {
 
-        String returnString = "";
-
-        String opcodeADD = "[ 0001 ]";
-        String opcodeSTO = "[ 1000 ]";
-        String cmp = "[ 0000 ]";
+        String opcode = "0001";
+        String cmp = "0000";
+        String mem1 = "";
+        String mem2 = "";
+        String reg = "";
 
         String[] splitInput = input.split(",");
 
-        // System.out.println("splitInput1: " + splitInput[1]);
-        // System.out.println("splitInput2: " + splitInput[2]);
-        // System.out.println("splitInput3: " + splitInput[3].substring(0,
-        // splitInput[3].length() - 1));
-        // System.out.println();
-
         // Check the first input
         try {
-            int input1 = Integer.parseInt(splitInput[1]);
-            System.out.println(
-                    input1 + " is a valid integer number");
-
             // If it is an integer, we need to store it in the table?
             // Or convert it straight to binary if that works? (Reaser did not explain)
 
+            Integer.parseInt(splitInput[1]);
+
+            lblAdress += 4;
+            List<String> addresses = new ArrayList<>();
+            addresses.add(splitInput[1]);
+            addresses.add(splitInput[1]);
+            int stoAddress = lblAdress + 100;
+            addresses.add(String.valueOf(stoAddress));
+            labelTable.add(addresses);
+
+            stoConv(String.valueOf(stoAddress));
+
+            reg = lodConv(String.valueOf(stoAddress));
+
         } catch (NumberFormatException e) {
-            System.out.println(
-                    splitInput[1] + " is a variable name");
 
             // Find the address
-            for (List<String> row : fixupTable) {
+            for (List<String> row : labelTable) {
                 if (row.get(0).equals(splitInput[1])) {
-                    System.out.println("FOUND: " + row);
+
+                    mem1 = row.get(2);
+
+                    reg = lodConv(mem1);
+
                 }
             }
 
@@ -92,49 +117,59 @@ public class Compiler {
 
         // Check the second input
         try {
-            int input2 = Integer.parseInt(splitInput[2]);
-            System.out.println(
-                    input2 + " is a valid integer number");
-
             // If it is an integer, we need to store it in the table?
             // Or convert it straight to binary if that works? (Reaser did not explain)
 
-        } catch (NumberFormatException e) {
-            System.out.println(
-                    splitInput[2] + " is a variable name");
+            Integer.parseInt(splitInput[2]);
 
+            lblAdress += 4;
+            List<String> addresses = new ArrayList<>();
+            addresses.add(splitInput[2]);
+            addresses.add(splitInput[2]);
+            int stoAddress = lblAdress + 100;
+            addresses.add(String.valueOf(stoAddress));
+            labelTable.add(addresses);
+
+            stoConv(String.valueOf(stoAddress));
+
+            mem2 = String.valueOf(stoAddress);
+
+        } catch (NumberFormatException e) {
             // Find the address
-            for (List<String> row : fixupTable) {
+            for (List<String> row : labelTable) {
                 if (row.get(0).equals(splitInput[2])) {
-                    System.out.println("FOUND: " + row);
+
+                    mem2 = row.get(2);
                 }
             }
         }
 
-        // Check the third input
-        try {
-            int input3 = Integer.parseInt(splitInput[3].substring(0, splitInput[3].length() - 1));
-            System.out.println(
-                    input3 + " is a valid integer number");
+        // Make sure storage location is in the table
+        String mem3 = "";
+        for (List<String> row : labelTable) {
+            if (row.get(0).equals(splitInput[3].substring(0, splitInput[3].length() - 1))) {
 
-            // If it is an integer, we need to store it in the table?
-            // Or convert it straight to binary if that works? (Reaser did not explain)
-
-        } catch (NumberFormatException e) {
-            System.out.println(
-                    splitInput[3].substring(0, splitInput[3].length() - 1) + " is a variable name");
-
-            // If it is a variable name, we need to check the table for its value
-            // Find the address
-            for (List<String> row : fixupTable) {
-                if (row.get(0).equals(splitInput[3].substring(0, splitInput[3].length() - 1))) {
-                    System.out.println("FOUND: " + row);
-                }
+                mem3 = row.get(2);
             }
-
         }
 
-        return returnString;
+        if (mem3.equals("")) {
+            // Get the label name and address
+            String labelName = splitInput[3].substring(0, splitInput[3].length() - 1);
+            String addr = String.valueOf(lblAdress + 100);
+            String value = "Result of ADD";
+            lblAdress += 4;
+
+            // Add into the array
+            List<String> addresses = new ArrayList<>();
+            addresses.add(labelName);
+            addresses.add(value);
+            addresses.add(addr);
+
+            labelTable.add(addresses);
+        }
+
+        return "ADD -> " + opcode + "/" + cmp + "/" + reg + "/" + decimalToBinary(Integer.parseInt(mem2));
     }
 
     /**
@@ -145,7 +180,103 @@ public class Compiler {
      */
     public static String subConv(String input) {
 
-        return "NEED TO FIX";
+        String opcode = "0010";
+        String cmp = "0000";
+        String mem1 = "";
+        String mem2 = "";
+        String reg = "";
+
+        String[] splitInput = input.split(",");
+
+        // Check the first input
+        try {
+            // If it is an integer, we need to store it in the table?
+            // Or convert it straight to binary if that works? (Reaser did not explain)
+
+            Integer.parseInt(splitInput[1]);
+
+            lblAdress += 4;
+            List<String> addresses = new ArrayList<>();
+            addresses.add(splitInput[1]);
+            addresses.add(splitInput[1]);
+            int stoAddress = lblAdress + 100;
+            addresses.add(String.valueOf(stoAddress));
+            labelTable.add(addresses);
+
+            stoConv(String.valueOf(stoAddress));
+
+            reg = lodConv(String.valueOf(stoAddress));
+
+        } catch (NumberFormatException e) {
+            // Find the address
+            for (List<String> row : labelTable) {
+                if (row.get(0).equals(splitInput[1])) {
+
+                    mem1 = row.get(2);
+
+                    reg = lodConv(mem1);
+
+                }
+            }
+
+            // If it is a variable name, we need to check the table for its value
+        }
+
+        // Check the second input
+        try {
+            // If it is an integer, we need to store it in the table?
+            // Or convert it straight to binary if that works? (Reaser did not explain)
+
+            Integer.parseInt(splitInput[2]);
+
+            lblAdress += 4;
+            List<String> addresses = new ArrayList<>();
+            addresses.add(splitInput[2]);
+            addresses.add(splitInput[2]);
+            int stoAddress = lblAdress + 100;
+            addresses.add(String.valueOf(stoAddress));
+            labelTable.add(addresses);
+
+            stoConv(String.valueOf(stoAddress));
+
+            mem2 = String.valueOf(stoAddress);
+
+        } catch (NumberFormatException e) {
+            // Find the address
+            for (List<String> row : labelTable) {
+                if (row.get(0).equals(splitInput[2])) {
+
+                    mem2 = row.get(2);
+                }
+            }
+        }
+
+        // Make sure storage location is in the table
+        String mem3 = "";
+        for (List<String> row : labelTable) {
+            if (row.get(0).equals(splitInput[3].substring(0, splitInput[3].length() - 1))) {
+
+                mem3 = row.get(2);
+            }
+        }
+
+        if (mem3.equals("")) {
+            // Get the label name and address
+            String labelName = splitInput[3].substring(0, splitInput[3].length() - 1);
+            String addr = String.valueOf(lblAdress + 100);
+            String value = "Result of SUB";
+            lblAdress += 4;
+
+            // Add into the array
+            List<String> addresses = new ArrayList<>();
+            addresses.add(labelName);
+            addresses.add(value);
+            addresses.add(addr);
+
+            labelTable.add(addresses);
+        }
+
+        return "SUB -> " + opcode + "/" + cmp + "/" + reg + "/" + decimalToBinary(Integer.parseInt(mem2));
     }
 
     /**
@@ -155,7 +286,105 @@ public class Compiler {
      * @return binary instruction
      */
     public static String mulConv(String input) {
-        return "NEED TO FIX";
+        String opcode = "0011";
+        String cmp = "0000";
+        String mem1 = "";
+        String mem2 = "";
+        String reg = "";
+
+        String[] splitInput = input.split(",");
+
+        // Check the first input
+        try {
+            // If it is an integer, we need to store it in the table?
+            // Or convert it straight to binary if that works? (Reaser did not explain)
+
+            Integer.parseInt(splitInput[1]);
+
+            lblAdress += 4;
+            List<String> addresses = new ArrayList<>();
+            addresses.add(splitInput[1]);
+            addresses.add(splitInput[1]);
+            int stoAddress = lblAdress + 100;
+            addresses.add(String.valueOf(stoAddress));
+            labelTable.add(addresses);
+
+            stoConv(String.valueOf(stoAddress));
+
+            reg = lodConv(String.valueOf(stoAddress));
+
+        } catch (NumberFormatException e) {
+
+            // Find the address
+            for (List<String> row : labelTable) {
+                if (row.get(0).equals(splitInput[1])) {
+
+                    mem1 = row.get(2);
+
+                    reg = lodConv(mem1);
+
+                }
+            }
+
+            // If it is a variable name, we need to check the table for its value
+        }
+
+        // Check the second input
+        try {
+            // If it is an integer, we need to store it in the table?
+            // Or convert it straight to binary if that works? (Reaser did not explain)
+
+            Integer.parseInt(splitInput[2]);
+
+            lblAdress += 4;
+            List<String> addresses = new ArrayList<>();
+            addresses.add(splitInput[2]);
+            addresses.add(splitInput[2]);
+            int stoAddress = lblAdress + 100;
+            addresses.add(String.valueOf(stoAddress));
+            labelTable.add(addresses);
+
+            stoConv(String.valueOf(stoAddress));
+
+            mem2 = String.valueOf(stoAddress);
+
+        } catch (NumberFormatException e) {
+
+            // Find the address
+            for (List<String> row : labelTable) {
+                if (row.get(0).equals(splitInput[2])) {
+
+                    mem2 = row.get(2);
+                }
+            }
+        }
+
+        // Make sure storage location is in the table
+        String mem3 = "";
+        for (List<String> row : labelTable) {
+            if (row.get(0).equals(splitInput[3].substring(0, splitInput[3].length() - 1))) {
+
+                mem3 = row.get(2);
+            }
+        }
+
+        if (mem3.equals("")) {
+            // Get the label name and address
+            String labelName = splitInput[3].substring(0, splitInput[3].length() - 1);
+            String addr = String.valueOf(lblAdress + 100);
+            String value = "Result of MUL";
+            lblAdress += 4;
+
+            // Add into the array
+            List<String> addresses = new ArrayList<>();
+            addresses.add(labelName);
+            addresses.add(value);
+            addresses.add(addr);
+
+            labelTable.add(addresses);
+        }
+
+        return "MUL -> " + opcode + "/" + cmp + "/" + reg + "/" + decimalToBinary(Integer.parseInt(mem2));
     }
 
     /**
@@ -165,7 +394,104 @@ public class Compiler {
      * @return binary instruction
      */
     public static String divConv(String input) {
-        return "NEED TO FIX";
+        String opcode = "0100";
+        String cmp = "0000";
+        String mem1 = "";
+        String mem2 = "";
+        String reg = "";
+
+        String[] splitInput = input.split(",");
+
+        // Check the first input
+        try {
+            // If it is an integer, we need to store it in the table?
+            // Or convert it straight to binary if that works? (Reaser did not explain)
+
+            Integer.parseInt(splitInput[1]);
+
+            lblAdress += 4;
+            List<String> addresses = new ArrayList<>();
+            addresses.add(splitInput[1]);
+            addresses.add(splitInput[1]);
+            int stoAddress = lblAdress + 100;
+            addresses.add(String.valueOf(stoAddress));
+            labelTable.add(addresses);
+
+            stoConv(String.valueOf(stoAddress));
+
+            reg = lodConv(String.valueOf(stoAddress));
+
+        } catch (NumberFormatException e) {
+
+            // Find the address
+            for (List<String> row : labelTable) {
+                if (row.get(0).equals(splitInput[1])) {
+
+                    mem1 = row.get(2);
+
+                    reg = lodConv(mem1);
+
+                }
+            }
+
+            // If it is a variable name, we need to check the table for its value
+        }
+
+        // Check the second input
+        try {
+            // If it is an integer, we need to store it in the table?
+            // Or convert it straight to binary if that works? (Reaser did not explain)
+
+            Integer.parseInt(splitInput[2]);
+
+            lblAdress += 4;
+            List<String> addresses = new ArrayList<>();
+            addresses.add(splitInput[2]);
+            addresses.add(splitInput[2]);
+            int stoAddress = lblAdress + 100;
+            addresses.add(String.valueOf(stoAddress));
+            labelTable.add(addresses);
+
+            stoConv(String.valueOf(stoAddress));
+
+            mem2 = String.valueOf(stoAddress);
+
+        } catch (NumberFormatException e) {
+            // Find the address
+            for (List<String> row : labelTable) {
+                if (row.get(0).equals(splitInput[2])) {
+
+                    mem2 = row.get(2);
+                }
+            }
+        }
+
+        // Make sure storage location is in the table
+        String mem3 = "";
+        for (List<String> row : labelTable) {
+            if (row.get(0).equals(splitInput[3].substring(0, splitInput[3].length() - 1))) {
+
+                mem3 = row.get(2);
+            }
+        }
+
+        if (mem3.equals("")) {
+            // Get the label name and address
+            String labelName = splitInput[3].substring(0, splitInput[3].length() - 1);
+            String addr = String.valueOf(lblAdress + 100);
+            String value = "Result of DIV";
+            lblAdress += 4;
+
+            // Add into the array
+            List<String> addresses = new ArrayList<>();
+            addresses.add(labelName);
+            addresses.add(value);
+            addresses.add(addr);
+
+            labelTable.add(addresses);
+        }
+
+        return "DIV -> " + opcode + "/" + cmp + "/" + reg + "/" + decimalToBinary(Integer.parseInt(mem2));
     }
 
     /**
@@ -184,7 +510,7 @@ public class Compiler {
         String lbl = input.substring(9, 10);
         String addr = "ADDRESS_OF__" + lbl + "__HERE"; // 20-char placeholder
 
-        return opcode + cmp + reg + addr;
+        return "JMP -> " + opcode + "/" + cmp + "/" + reg + "/" + addr;
     }
 
     /**
@@ -212,18 +538,36 @@ public class Compiler {
         if (cmp != null)
             flag = true;
 
-        return opcode + cmp + reg_contents + addr_contents;
+        return "CMP -> " + opcode + "/" + cmp + "/" + reg_contents + "/" + addr_contents;
     }
 
-    public static String lodConv(String input) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public static String lodConv(String mem) {
+
+        String opcode = "0111";
+        String cmp = "0000";
+
+        fpreg += 1;
+        String reg = decimalToBinary(fpreg);
+
+        binOut.add("LOD -> " + opcode + "/" + cmp + "/" + reg + "/" + decimalToBinary(Integer.parseInt(mem)));
+
+        return reg;
     }
 
-    public static String stoConv(String input) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public static void stoConv(String mem) {
+
+        String opcode = "1000";
+        String cmp = "0000";
+
+        fpreg += 1;
+        String reg = decimalToBinary(fpreg);
+
+        binOut.add("STO -> " + opcode + "/" + cmp + "/" + reg + "/" + mem);
+
     }
 
     public static String hltConv(String input) {
+        // Should just hault processor
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -261,8 +605,6 @@ public class Compiler {
 
     public static void createFixupTable(ArrayList<String> atoms) {
 
-        int address = 200;
-
         for (String atom : atoms) {
 
             String[] splitInput = atom.split(",");
@@ -270,24 +612,23 @@ public class Compiler {
             if (atom.substring(1, 4).equals("LBL")) {
 
                 // Get the label name and address
-                String labelName = atom.substring(9, 11);
-                String addr = String.valueOf(address);
-                address += 4;
+                String labelName = splitInput[5].substring(0, splitInput[5].length() - 1);
+                String addr = String.valueOf(lblAdress);
+                lblAdress += 4;
 
                 // Add into the array
                 List<String> addresses = new ArrayList<>();
                 addresses.add(labelName);
                 addresses.add(addr);
-                fixupTable.add(addresses);
-            }
+                labelTable.add(addresses);
 
-            if (atom.substring(1, 4).equals("MOV")) {
+            } else if (atom.substring(1, 4).equals("MOV")) {
 
                 // Get the label name and address
                 String labelName = splitInput[5].substring(0, splitInput[5].length() - 1);
-                String addr = String.valueOf(address);
+                String addr = String.valueOf(lblAdress + 100);
                 String value = splitInput[1];
-                address += 4;
+                lblAdress += 4;
 
                 // Add into the array
                 List<String> addresses = new ArrayList<>();
@@ -295,7 +636,40 @@ public class Compiler {
                 addresses.add(value);
                 addresses.add(addr);
 
+                labelTable.add(addresses);
+
+            } else if (atom.substring(1, 4).equals("TST")) {
+
+                // Get the label name and address
+                String labelName = splitInput[5].substring(0, splitInput[5].length() - 1);
+                String addr = String.valueOf(lblAdress);
+                lblAdress += 4;
+
+                // Add into the array
+                List<String> addresses = new ArrayList<>();
+                addresses.add(labelName);
+                addresses.add(addr);
+
                 fixupTable.add(addresses);
+
+            } else if (atom.substring(1, 4).equals("JMP")) {
+
+                // Get the label name and address
+                String labelName = splitInput[5].substring(0, splitInput[5].length() - 1);
+                String addr = String.valueOf(lblAdress);
+                lblAdress += 4;
+
+                // Add into the array
+                List<String> addresses = new ArrayList<>();
+                addresses.add(labelName);
+                addresses.add(addr);
+
+                fixupTable.add(addresses);
+
+            } else {
+
+                lblAdress += 4;
+
             }
         }
     }
@@ -306,7 +680,6 @@ public class Compiler {
         String filename = "phase3/test.txt";
         String[] fileLines = readFileToArray(filename);
         ArrayList<String> atoms = new ArrayList<String>();
-        ArrayList<String> binOut = new ArrayList<String>();
 
         for (String line : fileLines) {
             atoms.add(line);
@@ -315,6 +688,37 @@ public class Compiler {
         // Create something to store labels and variables
         createFixupTable(atoms);
 
+        for (String atom : atoms) {
+            // TODO: Convert atoms to their respective instructions
+            // ex: MOV, TST, LBL (?), CMP are not atoms, but instructions
+
+            if (atom.substring(1, 4).equals("CLR")) {
+                binOut.add(clrConv(atom));
+            } else if (atom.substring(1, 4).equals("ADD")) {
+                binOut.add(addConv(atom));
+            } else if (atom.substring(1, 4).equals("SUB")) {
+                binOut.add(subConv(atom));
+            } else if (atom.substring(1, 4).equals("MUL")) {
+                binOut.add(mulConv(atom));
+            } else if (atom.substring(1, 4).equals("DIV")) {
+                binOut.add(divConv(atom));
+            } else if (atom.substring(1, 4).equals("JMP")) {
+                binOut.add(jmpConv(atom));
+            } else if (atom.substring(1, 4).equals("CMP")) {
+                // binOut.add(cmpConv(atom));
+            } else if (atom.substring(1, 4).equals("LOD")) {
+                binOut.add(lodConv(atom));
+            } else if (atom.substring(1, 4).equals("STO")) {
+                // binOut.add(stoConv(atom));
+            } else if (atom.substring(1, 4).equals("HLT")) {
+                binOut.add(hltConv(atom));
+            } else if (atom.substring(1, 4).equals("MOV")) {
+                movConv(atom);
+            } else if (atom.substring(1, 4).equals("LBL")) {
+                // lblConv(atom);
+            }
+        }
+
         System.out.println("Fixup Table:");
 
         for (List<String> item : fixupTable)
@@ -322,45 +726,20 @@ public class Compiler {
 
         System.out.println();
 
-        for (String atom : atoms) {
-            // TODO: Convert atoms to their respective instructions
-            // ex: MOV, TST, LBL (?), CMP are not atoms, but instructions
+        System.out.println("Label Table:");
 
-            if (atom.substring(1, 4).equals("CLR")) {
-                // binOut.add(clrConv(atom));
-                System.out.println("CLR");
-            } else if (atom.substring(1, 4).equals("ADD")) {
-                // binOut.add(addConv(atom));
-                System.out.println(addConv(atom));
-            } else if (atom.substring(1, 4).equals("SUB")) {
-                // binOut.add(subConv(atom));
-                // System.out.println(subConv(atom));
-            } else if (atom.substring(1, 4).equals("MUL")) {
-                // binOut.add(mulConv(atom));
-                // System.out.println(mulConv(atom));
-            } else if (atom.substring(1, 4).equals("DIV")) {
-                // binOut.add(divConv(atom));
-                // System.out.println(divConv(atom));
-            } else if (atom.substring(1, 4).equals("JMP")) {
-                // binOut.add(jmpConv(atom));
-                System.out.println("JMP");
-            } else if (atom.substring(1, 4).equals("CMP")) {
-                // binOut.add(cmpConv(atom));
-                System.out.println("CMP");
-            } else if (atom.substring(1, 4).equals("LOD")) {
-                // binOut.add(lodConv(atom));
-                System.out.println("LOD");
-            } else if (atom.substring(1, 4).equals("STO")) {
-                // binOut.add(stoConv(atom));
-                System.out.println("STO");
-            } else if (atom.substring(1, 4).equals("HLT")) {
-                // binOut.add(hltConv(atom));
-                System.out.println("HLT");
-            } else if (atom.substring(1, 4).equals("MOV")) {
-                // binOut.add(movConv(atom));
-                // System.out.println("MOV");
-            }
+        for (List<String> item : labelTable)
+            System.out.println(item);
+
+        System.out.println();
+
+        System.out.println("Machine Code:");
+
+        // Print each string in the list
+        for (String item : binOut) {
+            System.out.println(item);
         }
+        System.out.println();
 
     }
 }
