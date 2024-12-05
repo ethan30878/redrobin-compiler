@@ -117,6 +117,7 @@ public class Compiler {
         }
 
         // Check the second input
+        // TODO: IF INPUT IS 0, JUST RETURN
         try {
             // If it is an integer, we need to store it in the table?
             // Or convert it straight to binary if that works? (Reaser did not explain)
@@ -224,6 +225,7 @@ public class Compiler {
         }
 
         // Check the second input
+        // TODO: IF INPUT IS 0, JUST RETURN
         try {
             // If it is an integer, we need to store it in the table?
             // Or convert it straight to binary if that works? (Reaser did not explain)
@@ -331,6 +333,7 @@ public class Compiler {
         }
 
         // Check the second input
+        // TODO: IF INPUT IS 1, JUST RETURN
         try {
             // If it is an integer, we need to store it in the table?
             // Or convert it straight to binary if that works? (Reaser did not explain)
@@ -439,6 +442,7 @@ public class Compiler {
         }
 
         // Check the second input
+        // TODO: IF INPUT IS 1, JUST RETURN
         try {
             // If it is an integer, we need to store it in the table?
             // Or convert it straight to binary if that works? (Reaser did not explain)
