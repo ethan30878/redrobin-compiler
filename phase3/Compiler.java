@@ -29,7 +29,7 @@ public class Compiler {
         String opcode = "0101";
         String cmp = "0000";
         String reg = input.substring(7, 11);
-        String addr = input.substring(11,input.length() - 1);
+        String addr = input.substring(11, input.length() - 1);
         return opcode + cmp + reg + addr;
     }
 
@@ -524,11 +524,17 @@ public class Compiler {
         String opcode = "0110";
         String cmp = "0000";
         String reg = cmp.substring(7, 11);
-        String address = cmp.substring(11,cmp.length() - 1);
+        String address = cmp.substring(11, cmp.length() - 1);
 
         return "CMP -> " + opcode + "/" + cmp + "/" + reg + "/" + address;
     }
 
+    /**
+     * Author: Jordan Dennison
+     * 
+     * @param mem memory location to be loaded
+     * @return register memory location
+     */
     public static String lodConv(String mem) {
 
         String opcode = "0111";
@@ -542,6 +548,11 @@ public class Compiler {
         return reg;
     }
 
+    /**
+     * Author: Jordan Dennison
+     * 
+     * @param mem memory location to be stored
+     */
     public static void stoConv(String mem) {
 
         String opcode = "1000";
