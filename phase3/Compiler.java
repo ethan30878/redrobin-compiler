@@ -25,10 +25,11 @@ public class Compiler {
      * @param reg register to be cleared
      * @return binary instruction
      */
-    public static String clrConv(String reg) {
+    public static String clrConv(String input) {
         String opcode = "0101";
         String cmp = "0000";
-        String addr = "00000000000000000000";
+        String reg = input.substring(7, 11);
+        String addr = input.substring(11,input.length() - 1);
         return opcode + cmp + reg + addr;
     }
 
@@ -516,29 +517,16 @@ public class Compiler {
     /**
      * Author: Ethan Glenn
      * 
-     * @param reg_contents  stuff in register
-     * @param addr_contents stuff in memory
+     * @param input
      * @return binary instruction
      */
-    public static String cmpConv(String reg_contents, String addr_contents) {
+    public static String cmpConv(String input) {
         String opcode = "0110";
-        String cmp = "0";
+        String cmp = "0000";
+        String reg = cmp.substring(7, 11);
+        String address = cmp.substring(11,cmp.length() - 1);
 
-        // ???
-        int cmp_val = reg_contents.compareTo(addr_contents);
-
-        if (cmp_val > 0) { // cmp <- 3
-            cmp += "011";
-        } else if (cmp_val < 0) { // cmp <- 2
-            cmp += "010";
-        } else { // cmp <- 1
-            cmp += "001";
-        }
-
-        if (cmp != null)
-            flag = true;
-
-        return "CMP -> " + opcode + "/" + cmp + "/" + reg_contents + "/" + addr_contents;
+        return "CMP -> " + opcode + "/" + cmp + "/" + reg + "/" + address;
     }
 
     public static String lodConv(String mem) {
