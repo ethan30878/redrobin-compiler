@@ -18,15 +18,26 @@ public class Compiler {
 
     /**
      * Author: Ethan Glenn
-     * 
-     * @param mem register address to be cleared
+     * Sample input (im assuming): (CLR,,,,,t0)
+     *  - or possibly refactor for (CLR,t0,,,,)?
+     * @param input
      */
-    public static void clrConv(String mem) {
+    public static String clrConv(String input) {
         String opcode = "0101";
         String cmp = "0000";
-        String reg = lodConv(mem);
+        
+        String[] splitInput = input.split(",");
+        String reg = splitInput[5].substring(0, splitInput[5].length() - 1);
 
-        binOut.add("CLR -> " + opcode + "/" + cmp + "/" + decimalToBinary(Integer.parseInt(reg)) + "/" + mem);
+        String mem = "";
+
+        for (List<String> row : labelTable) {
+            if (row.get(0).equals(reg)) {
+                mem = row.get(2);
+            }
+        }
+
+        return "CLR -> " + opcode + "/" + cmp + "/" + decimalToBinary(Integer.parseInt(reg)) + "/" + mem;
     }
 
     /**
@@ -498,20 +509,24 @@ public class Compiler {
     /**
      * Author: Ethan Glenn
      * 
-     * @param input atom string to be converted
+     * @param input 
      * @return binary instruction
      */
     public static String jmpConv(String input) {
         String opcode = "0101";
+        String cmp = "0000"; 
 
-        // May be unnecessary here, Reaser explained it like these are always all 0s
-        String cmp = "0000"; // Unconditional JMP case (default)
-        String reg = "0000";
+        String[] splitInput = input.split(",");
+        String reg = splitInput[5].substring(0);
+        String mem = "";
 
-        String lbl = input.substring(9, 10);
-        String addr = "ADDRESS_OF__" + lbl + "__HERE"; // 20-char placeholder
+        for (List<String> row : labelTable) {
+            if (row.get(0).equals(reg)) {
+                mem = row.get(2);
+            }
+        }
 
-        return "JMP -> " + opcode + "/" + cmp + "/" + reg + "/" + addr;
+        return "JMP -> " + opcode + "/" + cmp + "/" + decimalToBinary(Integer.parseInt(reg)) + "/" + mem;
     }
 
     /**
