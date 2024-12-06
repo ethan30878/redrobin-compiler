@@ -531,17 +531,48 @@ public class Compiler {
 
     /**
      * Author: Ethan Glenn
-     * 
+     * TODO: Verify CMP logic(???)
      * @param input
      * @return binary instruction
      */
     public static String cmpConv(String input) {
         String opcode = "0110";
-        String cmp = "0000";
-        String reg = cmp.substring(7, 11);
-        String address = cmp.substring(11, cmp.length() - 1);
+        String cmp = "0000"; // "always true", default
 
-        return "CMP -> " + opcode + "/" + cmp + "/" + reg + "/" + address;
+        String[] splitInput = input.split(",");
+        String reg1 = splitInput[1];
+        String reg2 = splitInput[2];
+        String mem1 = "";
+        String mem2 = "";
+
+        for (List<String> row : labelTable) {
+            if (row.get(0).equals(reg1))
+                mem1 = row.get(2);
+
+            if (row.get(0).equals(reg2))
+                mem2 = row.get(2);
+        }
+
+        // Attempt at implementing logic
+        try {
+            int reg1Value = Integer.parseInt(lodConv(mem1));
+            int reg2Value = Integer.parseInt(lodConv(mem2));
+            int compVal = Integer.compare(reg1Value, reg2Value);
+    
+            if (compVal < 0) 
+                cmp = decimalToBinary(1);
+            else if (compVal == 0)
+                cmp = decimalToBinary(2);
+            else
+                cmp = decimalToBinary(3);
+
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }    
+
+        // Assuming we're following the register + memory address format
+        binOut.add("CMP -> " + opcode + "/" + cmp + "/" + decimalToBinary(Integer.parseInt(reg1)) + "/" + mem2);
+        return cmp;
     }
 
     /**
