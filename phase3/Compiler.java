@@ -517,16 +517,33 @@ public class Compiler {
         String cmp = "0000"; 
 
         String[] splitInput = input.split(",");
-        String reg = splitInput[5].substring(0);
+       // String reg = splitInput[5].substring(0);
+        String reg = splitInput[5].trim();
         String mem = "";
 
+        //Added to remove trailing )
+        if (reg.endsWith(")")){
+            reg=reg.substring(0, reg.length()-1);
+            
+        }
+       
+
+        //changed because weird index out of bounds
         for (List<String> row : labelTable) {
             if (row.get(0).equals(reg)) {
-                mem = row.get(2);
+                if (row.size() == 2) {
+                    mem = row.get(1);
+                } else if (row.size() > 2) {
+                    mem = row.get(2);
+                }
+                break;
+                
             }
         }
-
-        return "JMP -> " + opcode + "/" + cmp + "/" + decimalToBinary(Integer.parseInt(reg)) + "/" + mem;
+       
+        
+        //return "JMP -> " + opcode + "/" + cmp + "/" + decimalToBinary(Integer.parseInt(reg)) + "/" + mem;
+        return "JMP -> " + opcode + "/" + cmp + "/0000/" + decimalToBinary(Integer.parseInt(mem));
     }
 
     /**
