@@ -644,6 +644,62 @@ public class Compiler {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * Author: Alejandro Santiago
+     * Implements the TST instruction.
+     * @param input The atom string
+     * @return Machine code for TST
+     */
+    public static String tstConv(String input) {
+        String opcodeCmp = "0110"; // CMP opcode
+        String opcodeJmp = "0101"; // JMP opcode
+        String cmp = pad(decimalToBinary(Integer.parseInt(input.split(",")[4])), 4); // Flag for CMP
+        String[] splitInput = input.split(",");
+    
+        String var = splitInput[1];  // Variable to compare
+        String value = splitInput[2]; // Comparison value
+        String label = splitInput[5].substring(0, splitInput[5].length() - 1); // Label to jump to
+    
+        // Find memory location of the variable
+        String memVar = "";
+        for (List<String> row : labelTable) {
+            if (row.get(0).equals(var)) {
+                memVar = row.get(2);
+            }
+        }
+    
+        // Store the comparison value in memory
+        lblAdress += 4;
+        List<String> newLabel = new ArrayList<>();
+        newLabel.add(value);
+        newLabel.add(value);
+        newLabel.add(String.valueOf(lblAdress));
+        labelTable.add(newLabel);
+
+        //store the value we are comparing to, generate sto instruction
+        stoConv(String.valueOf(lblAdress));
+    
+        // Generate CMP instruction
+        String cmpInstruction = "CMP -> " + opcodeCmp + "/" + cmp + "/" + pad(decimalToBinary(Integer.parseInt(memVar)), 4) + "/" + pad(decimalToBinary(lblAdress), 20);
+    
+        // Generate JMP instruction based on label
+        String memLabel = "";
+        for (List<String> row : fixupTable) {
+            if (row.get(0).equals(label)) {
+                memLabel = row.get(1);
+            }
+        }
+        
+        String jmpInstruction = "JMP -> " + opcodeJmp + "/0000/0000/" + pad(decimalToBinary(Integer.parseInt(memLabel)), 20);
+    
+        return cmpInstruction + "\n" + jmpInstruction;
+    }
+    
+    
+    
+    
+
+
     static String decimalToBinary(int num) {
 
         Stack<Integer> st = new Stack<>();
@@ -789,6 +845,8 @@ public class Compiler {
                 movConv(atom);
             } else if (atom.substring(1, 4).equals("LBL")) {
                 // lblConv(atom);
+            }else if (atom.substring(1, 4).equals("TST")) {
+                binOut.add(tstConv(atom));
             }
         }
 
