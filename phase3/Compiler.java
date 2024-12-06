@@ -18,37 +18,40 @@ public class Compiler {
 
     /**
      * Author: Jee McCloud
+     * 
      * @param input
      * @param length
      */
-    public static String pad(String input, int length){
-        while (input.length()<length){
-            input="0"+input;
+    public static String pad(String input, int length) {
+        while (input.length() < length) {
+            input = "0" + input;
         }
         return input;
     }
+
     /**
      * Author: Ethan Glenn
      * Sample input (im assuming): (CLR,,,,,t0)
-     *  - or possibly refactor for (CLR,t0,,,,)?
+     * - or possibly refactor for (CLR,t0,,,,)?
+     * 
      * @param input
      */
-    public static String clrConv(String input) {
+    public static String clrConv(String reg) {
         String opcode = "0101";
         String cmp = "0000";
-        
-        String[] splitInput = input.split(",");
-        String reg = splitInput[5].substring(0, splitInput[5].length() - 1);
 
-        String mem = "";
+        // String[] splitInput = input.split(",");
+        // String reg = splitInput[5].substring(0, splitInput[5].length() - 1);
 
-        for (List<String> row : labelTable) {
-            if (row.get(0).equals(reg)) {
-                mem = row.get(2);
-            }
-        }
+        // String mem = "";
 
-        return "CLR -> " + opcode + "/" + cmp + "/" + pad(decimalToBinary(Integer.parseInt(reg)),4) + "/" + mem;
+        // for (List<String> row : labelTable) {
+        // if (row.get(0).equals(reg)) {
+        // mem = row.get(2);
+        // }
+        // }
+
+        return "CLR -> " + opcode + "/" + cmp + "/" + reg + "/" + "00000000000000000000";
     }
 
     /**
@@ -80,7 +83,7 @@ public class Compiler {
 
         reg = decimalToBinary(Integer.parseInt(reg));
 
-        binOut.add("MOV -> " + opcode + "/" + cmp + "/" + pad(reg,4) + "/" + splitInput[1]);
+        binOut.add("MOV -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/" + splitInput[1]);
     }
 
     /**
@@ -189,7 +192,8 @@ public class Compiler {
             labelTable.add(addresses);
         }
 
-        return "ADD -> " + opcode + "/" + cmp + "/" + pad(reg,4) + "/" + pad(decimalToBinary(Integer.parseInt(mem2)),20);
+        return "ADD -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+                + pad(decimalToBinary(Integer.parseInt(mem2)), 20);
     }
 
     /**
@@ -297,7 +301,8 @@ public class Compiler {
             labelTable.add(addresses);
         }
 
-        return "SUB -> " + opcode + "/" + cmp + "/" + pad(reg,4) + "/" + pad(decimalToBinary(Integer.parseInt(mem2)),20);
+        return "SUB -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+                + pad(decimalToBinary(Integer.parseInt(mem2)), 20);
     }
 
     /**
@@ -406,7 +411,8 @@ public class Compiler {
             labelTable.add(addresses);
         }
 
-        return "MUL -> " + opcode + "/" + cmp + "/" + pad(reg,4) + "/" + pad(decimalToBinary(Integer.parseInt(mem2)),20);
+        return "MUL -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+                + pad(decimalToBinary(Integer.parseInt(mem2)), 20);
     }
 
     /**
@@ -514,32 +520,32 @@ public class Compiler {
             labelTable.add(addresses);
         }
 
-        return "DIV -> " + opcode + "/" + cmp + "/" + pad(reg,4) + "/" + pad(decimalToBinary(Integer.parseInt(mem2)),20);
+        return "DIV -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+                + pad(decimalToBinary(Integer.parseInt(mem2)), 20);
     }
 
     /**
      * Author: Ethan Glenn
      * 
-     * @param input 
+     * @param input
      * @return binary instruction
      */
     public static String jmpConv(String input) {
         String opcode = "0101";
-        String cmp = "0000"; 
+        String cmp = "0000";
 
         String[] splitInput = input.split(",");
-       // String reg = splitInput[5].substring(0);
+        // String reg = splitInput[5].substring(0);
         String reg = splitInput[5].trim();
         String mem = "";
 
-        //Added to remove trailing )
-        if (reg.endsWith(")")){
-            reg=reg.substring(0, reg.length()-1);
-            
-        }
-       
+        // Added to remove trailing )
+        if (reg.endsWith(")")) {
+            reg = reg.substring(0, reg.length() - 1);
 
-        //changed because weird index out of bounds
+        }
+
+        // changed because weird index out of bounds
         for (List<String> row : labelTable) {
             if (row.get(0).equals(reg)) {
                 if (row.size() == 2) {
@@ -548,18 +554,19 @@ public class Compiler {
                     mem = row.get(2);
                 }
                 break;
-                
+
             }
         }
-       
-        
-        //return "JMP -> " + opcode + "/" + cmp + "/" + decimalToBinary(Integer.parseInt(reg)) + "/" + mem;
-        return "JMP -> " + opcode + "/" + cmp + "/0000/" + pad(decimalToBinary(Integer.parseInt(mem)),20);
+
+        // return "JMP -> " + opcode + "/" + cmp + "/" +
+        // decimalToBinary(Integer.parseInt(reg)) + "/" + mem;
+        return "JMP -> " + opcode + "/" + cmp + "/0000/" + pad(decimalToBinary(Integer.parseInt(mem)), 20);
     }
 
     /**
      * Author: Ethan Glenn
      * TODO: Verify CMP logic(???)
+     * 
      * @param input
      * @return binary instruction
      */
@@ -586,8 +593,8 @@ public class Compiler {
             int reg1Value = Integer.parseInt(lodConv(mem1));
             int reg2Value = Integer.parseInt(lodConv(mem2));
             int compVal = Integer.compare(reg1Value, reg2Value);
-    
-            if (compVal < 0) 
+
+            if (compVal < 0)
                 cmp = decimalToBinary(1);
             else if (compVal == 0)
                 cmp = decimalToBinary(2);
@@ -596,10 +603,11 @@ public class Compiler {
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-        }    
+        }
 
         // Assuming we're following the register + memory address format
-        binOut.add("CMP -> " + opcode + "/" + cmp + "/" + pad(decimalToBinary(Integer.parseInt(reg1)),4) + "/" + pad(mem2,20));
+        binOut.add("CMP -> " + opcode + "/" + cmp + "/" + pad(decimalToBinary(Integer.parseInt(reg1)), 4) + "/"
+                + pad(mem2, 20));
         return cmp;
     }
 
@@ -617,7 +625,8 @@ public class Compiler {
         fpreg += 1;
         String reg = decimalToBinary(fpreg);
 
-        binOut.add("LOD -> " + opcode + "/" + cmp + "/" + pad(reg,4) + "/" + pad((decimalToBinary(Integer.parseInt(mem))),20));
+        binOut.add("LOD -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+                + pad((decimalToBinary(Integer.parseInt(mem))), 20));
 
         return reg;
     }
@@ -635,7 +644,8 @@ public class Compiler {
         fpreg += 1;
         String reg = decimalToBinary(fpreg);
 
-        binOut.add("STO -> " + opcode + "/" + cmp + "/" + pad(reg,4) + "/" + pad(decimalToBinary(Integer.parseInt(mem)),20));
+        binOut.add("STO -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+                + pad(decimalToBinary(Integer.parseInt(mem)), 20));
 
     }
 
