@@ -845,16 +845,16 @@ public class Compiler {
                 binOut.add(jmpConv(atom));
             } else if (atom.substring(1, 4).equals("CMP")) {
                 // binOut.add(cmpConv(atom));
-            } else if (atom.substring(1, 4).equals("LOD")) {
-                binOut.add(lodConv(atom));
-            } else if (atom.substring(1, 4).equals("STO")) {
-                // binOut.add(stoConv(atom));
-            } else if (atom.substring(1, 4).equals("HLT")) {
-                binOut.add(hltConv(atom));
-            } else if (atom.substring(1, 4).equals("MOV")) {
-                movConv(atom);
+//            } else if (atom.substring(1, 4).equals("LOD")) {
+//                binOut.add(lodConv(atom));
+//            } else if (atom.substring(1, 4).equals("STO")) {
+//                // binOut.add(stoConv(atom));
+//            } else if (atom.substring(1, 4).equals("HLT")) {
+//                binOut.add(hltConv(atom));
+//            } else if (atom.substring(1, 4).equals("MOV")) {
+//                movConv(atom);
             } else if (atom.substring(1, 4).equals("LBL")) {
-                // lblConv(atom);
+                //lblConv(atom);
             }else if (atom.substring(1, 4).equals("TST")) {
                 binOut.add(tstConv(atom));
             }
