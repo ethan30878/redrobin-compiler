@@ -635,7 +635,7 @@ public class Compiler {
         fpreg += 1;
         String reg = decimalToBinary(fpreg);
 
-        binOut.add("STO -> " + opcode + "/" + cmp + "/" + pad(reg,4) + "/" + pad(mem,20));
+        binOut.add("STO -> " + opcode + "/" + cmp + "/" + pad(reg,4) + "/" + pad(decimalToBinary(Integer.parseInt(mem)),20));
 
     }
 
