@@ -16,6 +16,11 @@ public class Compiler {
     public static List<List<String>> labelTable = new ArrayList<>();
     public static List<String> binOut = new ArrayList<>();
 
+    //flags for optimizations
+    public static boolean enableOptimizationBackend = false;
+    public static boolean enableOptimizationFrontEnd = false;
+
+
     /**
      * Author: Jee McCloud
      * 
@@ -705,7 +710,44 @@ public class Compiler {
         return cmpInstruction + "\n" + jmpInstruction;
     }
     
+
+     /**
+     * Author: Alejandro Santiago & Ethan Glenn
+     * IN PROGRESS
+     * looks at the binout and checks locations of lod and sto to remove when they go to the same address. 
+     */
+    public static void optimizeLoadStore() {
+        
+        List<String> optimizedBinOut = new ArrayList<>();
+        String lastLoad = "";
+        String lastStore = "";
     
+        for (String instr : binOut) {
+            if (instr.startsWith("LOD ->")) {
+                lastLoad = instr;
+            } else if (instr.startsWith("STO ->")) {
+                lastStore = instr;
+                // Compare if the last LOD and STO target the same memory address
+                String[] loadParts = lastLoad.split("/");
+                String[] storeParts = lastStore.split("/");
+    
+                if (loadParts.length > 3 && storeParts.length > 3) {
+                    String loadMem = loadParts[3];
+                    String storeMem = storeParts[3];
+                    if (loadMem.equals(storeMem)) {
+                        // Redundant STO, skip adding it
+                        continue;
+                    }
+                }
+                optimizedBinOut.add(instr);
+            } else {
+                optimizedBinOut.add(instr);
+            }
+        }
+    
+        binOut = optimizedBinOut;
+    }
+
     
     
 
@@ -814,11 +856,15 @@ public class Compiler {
     }
 
     public static void main(String[] args) {
-
+        
         // Test to read in txt file
         String filename = "phase3/test.txt";
         String[] fileLines = readFileToArray(filename);
         ArrayList<String> atoms = new ArrayList<String>();
+
+
+
+
 
         for (String line : fileLines) {
             atoms.add(line);
@@ -859,6 +905,18 @@ public class Compiler {
                 binOut.add(tstConv(atom));
             }
         }
+
+
+    // Apply optimizations if enabled
+
+        if (enableOptimizationBackend) {
+            optimizeLoadStore(); // Another example optimization
+        }
+        if (enableOptimizationFrontEnd)
+        {
+            //here you would optimize the front end flag
+        }
+
 
         System.out.println("Fixup Table:");
 
