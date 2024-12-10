@@ -12,6 +12,9 @@
  * Date Created: September 12, 2024
  * Date Last Modified: Septempter 27, 2024
  * **/
+
+package phase1;
+
 import java.util.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
