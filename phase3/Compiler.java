@@ -17,7 +17,7 @@ public class Compiler {
     public static List<String> binOut = new ArrayList<>();
 
     //flags for optimizations
-    public static boolean enableOptimizationBackend = false;
+    public static boolean enableOptimizationBackend = true;
     public static boolean enableOptimizationFrontEnd = false;
 
 
@@ -60,7 +60,7 @@ public class Compiler {
     }
 
     /**
-     * Author: Jordan Dennison
+     * Author: Jordan Dennison && Alejandro Santiago
      * 
      * @param input input atom
      * @return binary instruction
@@ -69,26 +69,34 @@ public class Compiler {
 
         String[] splitInput = input.split(",");
 
-        String mem1 = splitInput[5].substring(0, splitInput[5].length() - 1);
-        String reg = "";
 
-        String opcode = "1000";
-        String cmp = "0000";
+        String src = splitInput[1].trim();
+       
+        String des =  splitInput[5].substring(0, splitInput[5].length() - 1);
 
-        // Find the address
+     
+
+        // Find the address for source(s)
         for (List<String> row : labelTable) {
-            if (row.get(0).equals(mem1)) {
+            if (row.get(0).equals(src)) {
 
-                mem1 = row.get(2);
-
-                reg = lodConv(mem1);
+                src = row.get(2);
 
             }
         }
 
-        reg = decimalToBinary(Integer.parseInt(reg));
 
-        binOut.add("MOV -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/" + splitInput[1]);
+          String destAddress = "";
+        for (List<String> row : labelTable) {
+            if (row.get(0).equals(des)) {
+
+                destAddress = row.get(2);
+
+            }
+        }
+        lodConv(src);
+        stoConv(destAddress);
+
     }
 
     /**
@@ -874,12 +882,9 @@ public class Compiler {
         createFixupTable(atoms);
 
         for (String atom : atoms) {
-            // TODO: Convert atoms to their respective instructions
-            // ex: MOV, TST, LBL (?), CMP are not atoms, but instructions
+            // ex: MOV, TST, LBL  are atoms, not instructions
 
-            if (atom.substring(1, 4).equals("CLR")) {
-                // binOut.add(clrConv(atom));
-            } else if (atom.substring(1, 4).equals("ADD")) {
+            if (atom.substring(1, 4).equals("ADD")) {
                 binOut.add(addConv(atom));
             } else if (atom.substring(1, 4).equals("SUB")) {
                 binOut.add(subConv(atom));
@@ -889,16 +894,8 @@ public class Compiler {
                 binOut.add(divConv(atom));
             } else if (atom.substring(1, 4).equals("JMP")) {
                 binOut.add(jmpConv(atom));
-            } else if (atom.substring(1, 4).equals("CMP")) {
-                // binOut.add(cmpConv(atom));
-//            } else if (atom.substring(1, 4).equals("LOD")) {
-//                binOut.add(lodConv(atom));
-//            } else if (atom.substring(1, 4).equals("STO")) {
-//                // binOut.add(stoConv(atom));
-//            } else if (atom.substring(1, 4).equals("HLT")) {
-//                binOut.add(hltConv(atom));
-//            } else if (atom.substring(1, 4).equals("MOV")) {
-//                movConv(atom);
+            } else if (atom.substring(1, 4).equals("MOV")) {
+               movConv(atom);
             } else if (atom.substring(1, 4).equals("LBL")) {
                 //lblConv(atom);
             }else if (atom.substring(1, 4).equals("TST")) {
@@ -912,10 +909,10 @@ public class Compiler {
         if (enableOptimizationBackend) {
             optimizeLoadStore(); // Another example optimization
         }
-        if (enableOptimizationFrontEnd)
-        {
-            //here you would optimize the front end flag
-        }
+        // if (enableOptimizationFrontEnd)
+        // {
+        //     //here you would optimize the front end flag
+        // }
 
 
         System.out.println("Fixup Table:");
