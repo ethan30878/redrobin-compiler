@@ -34,7 +34,7 @@ class Scanner {
 
                         public void print() {
                                 if (tokenIdentifier.equals("INT_LITERAL") || tokenIdentifier.equals("FLOAT_LITERAL") || tokenIdentifier.equals("IDENTIFIER")) {
-                                        System.out.println(tokenIdentifier + " Data:  " + Data);
+                                        System.out.println(tokenIdentifier + " Data:" + Data);
                                 } else {
                                         System.out.println(tokenIdentifier);
                                 }
@@ -142,7 +142,7 @@ class Scanner {
                 finalStates.put(33, "DIVISION_OPERATOR");
                 finalStates.put(34, "MULTIPLICATION_OPERATOR");
                 finalStates.put(35, "SUBTRACTION_OPERATOR");
-                finalStates.put(36, "ADDITON_OPERATOR");
+                finalStates.put(36, "ADDITION_OPERATOR");
 
                 // COMPARISON OPERATORS
                 finalStates.put(43, "LESS_THAN_OPERATOR");
