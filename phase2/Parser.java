@@ -627,8 +627,7 @@ public class Parser {
 				}
 			}
 	
-			String tempReg = "T" + tempValue++; // Correctly increment tempValue here
-			System.out.println("Debug: Generated tempReg = " + tempReg); // Debugging
+			String tempReg = ""; 
 			
 			for (int i = end; i > 0; i--) {
 				if (OoOp.charAt(i) == '(') {
