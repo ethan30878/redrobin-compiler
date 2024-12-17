@@ -3,6 +3,7 @@ package phase3;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -16,10 +17,9 @@ public class Compiler {
     public static List<List<String>> labelTable = new ArrayList<>();
     public static List<String> binOut = new ArrayList<>();
 
-    //flags for optimizations
+    // flags for optimizations
     public static boolean enableOptimizationBackend = true;
     public static boolean enableOptimizationFrontEnd = false;
-
 
     /**
      * Author: Jee McCloud
@@ -69,12 +69,9 @@ public class Compiler {
 
         String[] splitInput = input.split(",");
 
-
         String src = splitInput[1].trim();
-       
-        String des =  splitInput[3].substring(0, splitInput[3].length() - 1);
 
-     
+        String des = splitInput[3].substring(0, splitInput[3].length() - 1);
 
         // Find the address for source(s)
         for (List<String> row : labelTable) {
@@ -85,8 +82,7 @@ public class Compiler {
             }
         }
 
-
-          String destAddress = "";
+        String destAddress = "";
         for (List<String> row : labelTable) {
             if (row.get(0).equals(des)) {
 
@@ -670,6 +666,7 @@ public class Compiler {
     /**
      * Author: Alejandro Santiago
      * Implements the TST instruction.
+     * 
      * @param input The atom string
      * @return Machine code for TST
      */
@@ -678,11 +675,11 @@ public class Compiler {
         String opcodeJmp = "0101"; // JMP opcode
         String cmp = pad(decimalToBinary(Integer.parseInt(input.split(",")[4])), 4); // Flag for CMP
         String[] splitInput = input.split(",");
-    
-        String var = splitInput[1];  // Variable to compare
+
+        String var = splitInput[1]; // Variable to compare
         String value = splitInput[2]; // Comparison value
         String label = splitInput[5].substring(0, splitInput[5].length() - 1); // Label to jump to
-    
+
         // Find memory location of the variable
         String memVar = "";
         for (List<String> row : labelTable) {
@@ -690,7 +687,7 @@ public class Compiler {
                 memVar = row.get(2);
             }
         }
-    
+
         // Store the comparison value in memory
         lblAdress += 4;
         List<String> newLabel = new ArrayList<>();
@@ -699,12 +696,13 @@ public class Compiler {
         newLabel.add(String.valueOf(lblAdress));
         labelTable.add(newLabel);
 
-        //store the value we are comparing to, generate sto instruction
+        // store the value we are comparing to, generate sto instruction
         stoConv(String.valueOf(lblAdress));
-    
+
         // Generate CMP instruction
-        String cmpInstruction = "CMP -> " + opcodeCmp + "/" + cmp + "/" + pad(decimalToBinary(Integer.parseInt(memVar)), 4) + "/" + pad(decimalToBinary(lblAdress), 20);
-    
+        String cmpInstruction = "CMP -> " + opcodeCmp + "/" + cmp + "/"
+                + pad(decimalToBinary(Integer.parseInt(memVar)), 4) + "/" + pad(decimalToBinary(lblAdress), 20);
+
         // Generate JMP instruction based on label
         String memLabel = "";
         for (List<String> row : fixupTable) {
@@ -712,69 +710,68 @@ public class Compiler {
                 memLabel = row.get(1);
             }
         }
-        
-        String jmpInstruction = "JMP -> " + opcodeJmp + "/0000/0000/" + pad(decimalToBinary(Integer.parseInt(memLabel)), 20);
-    
+
+        String jmpInstruction = "JMP -> " + opcodeJmp + "/0000/0000/"
+                + pad(decimalToBinary(Integer.parseInt(memLabel)), 20);
+
         return cmpInstruction + "\n" + jmpInstruction;
     }
-    
 
-     /**
+    /**
      * Author: Alejandro Santiago & Ethan Glenn
      * IN PROGRESS
-     * looks at the binout and checks locations of lod and sto to remove when they go to the same address. 
+     * looks at the binout and checks locations of lod and sto to remove when they
+     * go to the same address.
      */
     /**
- * Optimizes the generated machine code by removing redundant LOD and STO instructions.
- */
-public static void optimizeLoadStore() {
-    List<String> optimizedBinOut = new ArrayList<>();
-    String lastInstruction = ""; // Stores the last instruction for comparison.
+     * Optimizes the generated machine code by removing redundant LOD and STO
+     * instructions.
+     */
+    public static void optimizeLoadStore() {
+        List<String> optimizedBinOut = new ArrayList<>();
+        String lastInstruction = ""; // Stores the last instruction for comparison.
 
-    for (String instr : binOut) {
-        if (instr.startsWith("LOD ->")) {
-            // Save the current LOD instruction for comparison
-            lastInstruction = instr;
-        } else if (instr.startsWith("STO ->")) {
-            // If the last instruction is a LOD and they share the same memory address, skip both
-            if (!lastInstruction.isEmpty() && lastInstruction.startsWith("LOD ->")) {
-                String[] loadParts = lastInstruction.split("/");
-                String[] storeParts = instr.split("/");
+        for (String instr : binOut) {
+            if (instr.startsWith("LOD ->")) {
+                // Save the current LOD instruction for comparison
+                lastInstruction = instr;
+            } else if (instr.startsWith("STO ->")) {
+                // If the last instruction is a LOD and they share the same memory address, skip
+                // both
+                if (!lastInstruction.isEmpty() && lastInstruction.startsWith("LOD ->")) {
+                    String[] loadParts = lastInstruction.split("/");
+                    String[] storeParts = instr.split("/");
 
-                if (loadParts.length > 3 && storeParts.length > 3) {
-                    String loadMem = loadParts[3]; // Memory address from LOD
-                    String storeMem = storeParts[3]; // Memory address from STO
+                    if (loadParts.length > 3 && storeParts.length > 3) {
+                        String loadMem = loadParts[3]; // Memory address from LOD
+                        String storeMem = storeParts[3]; // Memory address from STO
 
-                    if (loadMem.equals(storeMem)) {
-                        // Skip both instructions, reset lastInstruction
-                        lastInstruction = "";
-                        continue;
+                        if (loadMem.equals(storeMem)) {
+                            // Skip both instructions, reset lastInstruction
+                            lastInstruction = "";
+                            continue;
+                        }
                     }
                 }
+                // Add the STO if it wasn't skipped
+                optimizedBinOut.add(instr);
+            } else {
+                // Add non-LOD/STO instructions directly to the optimized list
+                if (!lastInstruction.isEmpty()) {
+                    optimizedBinOut.add(lastInstruction); // Add the pending LOD
+                    lastInstruction = ""; // Reset the last instruction
+                }
+                optimizedBinOut.add(instr);
             }
-            // Add the STO if it wasn't skipped
-            optimizedBinOut.add(instr);
-        } else {
-            // Add non-LOD/STO instructions directly to the optimized list
-            if (!lastInstruction.isEmpty()) {
-                optimizedBinOut.add(lastInstruction); // Add the pending LOD
-                lastInstruction = ""; // Reset the last instruction
-            }
-            optimizedBinOut.add(instr);
         }
+
+        // If there's a leftover last LOD, add it (unlikely, but for safety)
+        if (!lastInstruction.isEmpty()) {
+            optimizedBinOut.add(lastInstruction);
+        }
+
+        binOut = optimizedBinOut;
     }
-
-    // If there's a leftover last LOD, add it (unlikely, but for safety)
-    if (!lastInstruction.isEmpty()) {
-        optimizedBinOut.add(lastInstruction);
-    }
-
-    binOut = optimizedBinOut;
-}
-
-    
-    
-
 
     static String decimalToBinary(int num) {
 
@@ -879,26 +876,72 @@ public static void optimizeLoadStore() {
         }
     }
 
+    public static ArrayList<String> globalOptimizer(ArrayList<String> oldArray) {
+
+        // Instantiate Arrays / Variables
+        ArrayList<String> newArray = new ArrayList<String>();
+        int deadCodeFlag = 0;
+
+        // Loop through atoms
+        for (String atom : oldArray) {
+
+            // Check if the atom is a label
+            if (atom.contains("LBL")) {
+
+                // Add the atom to the return array
+                deadCodeFlag = 0;
+                newArray.add(atom);
+
+                continue;
+
+            }
+
+            // Check if the atom is a jump or test
+            if (atom.contains("JMP") || atom.contains("TST")) {
+
+                deadCodeFlag = 1;
+                newArray.add(atom);
+                continue;
+
+            }
+
+            // Dead code checker, if so skip the atom
+            if (deadCodeFlag == 1) {
+
+                continue;
+
+            }
+
+            newArray.add(atom);
+
+        }
+
+        return newArray;
+    }
+
     public static void main(String[] args) {
-        
+
         // Test to read in txt file
         String filename = "phase3/test.txt";
         String[] fileLines = readFileToArray(filename);
         ArrayList<String> atoms = new ArrayList<String>();
 
-
-
-
+        int globalOp = 1;
 
         for (String line : fileLines) {
             atoms.add(line);
         }
 
+        if (globalOp == 1) {
+            atoms = globalOptimizer(atoms);
+        }
+
         // Create something to store labels and variables
         createFixupTable(atoms);
 
+        System.out.println("Atoms: \n" + atoms);
+
         for (String atom : atoms) {
-            // ex: MOV, TST, LBL  are atoms, not instructions
 
             if (atom.substring(1, 4).equals("ADD")) {
                 binOut.add(addConv(atom));
@@ -910,22 +953,21 @@ public static void optimizeLoadStore() {
                 binOut.add(divConv(atom));
             } else if (atom.substring(1, 4).equals("JMP")) {
                 binOut.add(jmpConv(atom));
+            } else if (atom.substring(1, 4).equals("CMP")) {
+                binOut.add(cmpConv(atom));
             } else if (atom.substring(1, 4).equals("MOV")) {
-               movConv(atom);
+                // movConv(atom);
             } else if (atom.substring(1, 4).equals("LBL")) {
-                //lblConv(atom);
-            }else if (atom.substring(1, 4).equals("TST")) {
+                // lblConv(atom);
+            } else if (atom.substring(1, 4).equals("TST")) {
                 binOut.add(tstConv(atom));
             }
         }
 
-
-   
         // if (enableOptimizationFrontEnd)
         // {
-        //     //here you would optimize the front end flag
+        // //here you would optimize the front end flag
         // }
-
 
         System.out.println("Fixup Table:");
 
@@ -948,9 +990,9 @@ public static void optimizeLoadStore() {
             System.out.println(item);
         }
         System.out.println();
-         // Apply optimizations if enabled
+        // Apply optimizations if enabled
 
-         if (enableOptimizationBackend) {
+        if (enableOptimizationBackend) {
             optimizeLoadStore(); // Another example optimization
         }
         System.out.println("Machine Code:");
