@@ -65,11 +65,11 @@ public class Parser {
 		// Get the first token
 		currentToken = tokens.poll();
 		// Start parsing the expression
-		parseStatement();
+		parseStatements();
 
 	}
 
-	int tempValue = 0;
+	int tempValue = 1; // Start from 1 to avoid T-1
 
 	private void parseDecl() {
 
@@ -138,17 +138,20 @@ public class Parser {
 		advance();
 	
 		String result = parseExpr();
-		result = createExprAtoms(result);
+	
+		// Directly assign literals without using a temporary variable
+		if (result.matches("^[0-9]+$")) { // If result is a literal (integer)
+			atoms.add("(MOV," + result + ",," + id.data + ")");
+		} else {
+			// If it's an expression, result is already a temp (e.g., T1, T2, ...)
+			atoms.add("(MOV," + result + ",," + id.data + ")");
+		}
 	
 		match("SEMICOLON");
 		advance();
-	
-		// Clean up token data
-		String variable = id.data.replace("Data:", "").trim();
-	
-		// Correct MOV atom formatting
-		atoms.add("(MOV," + result + ",," + variable + ")");
 	}
+	
+	
 	
 	
 		
@@ -161,7 +164,7 @@ public class Parser {
 				currentToken.tokenIdentifier.equals("IDENTIFIER")) {
 		
 				System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
-				String toRet = currentToken.data.replace("Data:", "").trim(); // Remove "Data:"
+				String toRet = currentToken.data;
 				advance();
 				return toRet;
 		
@@ -243,12 +246,22 @@ public class Parser {
 
 	public String parseExpr() {
 		String left = parseAddSub();
+		
+		// If no operations and 'left' is already an INT_LITERAL or IDENTIFIER, use it directly
+		if (!left.startsWith("T") && !left.matches("^[0-9]+$")) {
+			String tempVar = "T" + tempValue++;
+			atoms.add("(MOV," + left + ",," + tempVar + ")");
+			left = tempVar;
+		}
 	
 		while (currentToken != null &&
 			   (currentToken.tokenIdentifier.equals("ADDITION_OPERATOR") ||
 				currentToken.tokenIdentifier.equals("SUBTRACTION_OPERATOR"))) {
 	
-			String operation = currentToken.data.equals("+") ? "ADD" : "SUB";
+			Token operatorToken = match(currentToken.tokenIdentifier);
+	
+			String operation = operatorToken.tokenIdentifier.equals("ADDITION_OPERATOR") ? "ADD" : "SUB";
+	
 			advance();
 			String right = parseAddSub();
 	
@@ -259,6 +272,7 @@ public class Parser {
 	
 		return left;
 	}
+	
 	
 	
 
@@ -324,17 +338,9 @@ public class Parser {
 
 	public void parseStatements() {
 
-		// TODO: ADD IF FOR START OF ANY PRODUCTION
-		if (currentToken.tokenIdentifier.equals("LET_KEYWORD") || currentToken.tokenIdentifier.equals("IF_KEYWORD")
-				|| currentToken.tokenIdentifier.equals("IDENTIFIER")
-				|| currentToken.tokenIdentifier.equals("FOR_KEYWORD")
-				|| currentToken.tokenIdentifier.equals("WHILE_KEYWORD")
-				|| currentToken.tokenIdentifier.equals("LET_KEYWORD")) {
+		while (currentToken != null) {
 			parseStatement();
 		}
-
-		// TODO: ELSE THROW ERROR
-
 	}
 
 	public void parseBranch() {
@@ -829,45 +835,46 @@ public class Parser {
 	
 		// Process each line and add tokens to the queue
 		for (String line : fileLines) {
-			String[] lineTokens = line.split(" ");
+			String[] lineTokens = line.split(":", 2); // Split only at the first colon
 			String identifier = lineTokens[0].trim();
-			String data;
+			String data = (lineTokens.length > 1) ? lineTokens[1].trim() : "";
+			tokensTest.add(new Token(identifier, data));		
 	
-			// If the line contains data, use it
-			if (lineTokens.length > 1) {
-				data = lineTokens[1].trim();
-			} else {
-				// Automatically fill in data for known single-token types
-				switch (identifier) {
-					case "ADDITION_OPERATOR":
-						data = "+";
-						break;
-					case "SUBTRACTION_OPERATOR":
-						data = "-";
-						break;
-					case "MULTIPLICATION_OPERATOR":
-						data = "*";
-						break;
-					case "DIVISION_OPERATOR":
-						data = "/";
-						break;
-					case "LEFT_PARANTHESIS":
-						data = "(";
-						break;
-					case "RIGHT_PARANTHESIS":
-						data = ")";
-						break;
-					case "LEFT_CURLY_BRACKET":
-						data = "{";
-						break;
-					case "RIGHT_CURLY_BRACKET":
-						data = "}";
-						break;
-					default:
-						data = ""; // Default to empty if no specific data is required
-				}
-			}
-			tokensTest.add(new Token(identifier, data));
+			// // If the line contains data, use it
+			// if (lineTokens.length > 1) {
+			// 	data = lineTokens[1].trim();
+			// } else {
+			// 	// Automatically fill in data for known single-token types
+			// 	switch (identifier) {
+			// 		case "ADDITION_OPERATOR":
+			// 			data = "+";
+			// 			break;
+			// 		case "SUBTRACTION_OPERATOR":
+			// 			data = "-";
+			// 			break;
+			// 		case "MULTIPLICATION_OPERATOR":
+			// 			data = "*";
+			// 			break;
+			// 		case "DIVISION_OPERATOR":
+			// 			data = "/";
+			// 			break;
+			// 		case "LEFT_PARANTHESIS":
+			// 			data = "(";
+			// 			break;
+			// 		case "RIGHT_PARANTHESIS":
+			// 			data = ")";
+			// 			break;
+			// 		case "LEFT_CURLY_BRACKET":
+			// 			data = "{";
+			// 			break;
+			// 		case "RIGHT_CURLY_BRACKET":
+			// 			data = "}";
+			// 			break;
+			// 		default:
+			// 			data = ""; // Default to empty if no specific data is required
+			// 	}
+			// }
+			// tokensTest.add(new Token(identifier, data));
 		}
 	
 		// Pass the tokens queue to the parser

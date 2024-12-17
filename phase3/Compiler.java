@@ -72,7 +72,7 @@ public class Compiler {
 
         String src = splitInput[1].trim();
        
-        String des =  splitInput[5].substring(0, splitInput[5].length() - 1);
+        String des =  splitInput[3].substring(0, splitInput[3].length() - 1);
 
      
 
@@ -830,7 +830,7 @@ public static void optimizeLoadStore() {
             } else if (atom.substring(1, 4).equals("MOV")) {
 
                 // Get the label name and address
-                String labelName = splitInput[5].substring(0, splitInput[5].length() - 1);
+                String labelName = splitInput[3].substring(0, splitInput[3].length() - 1);
                 String addr = String.valueOf(lblAdress + 100);
                 String value = splitInput[1];
                 lblAdress += 4;
