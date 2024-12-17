@@ -917,18 +917,25 @@ public static void peepholeOptimizeLoadStore() {
     }
 
     public static void main(String[] args) {
-	boolean enableOptimizationBackend;
-	if (args.length > 1) {
-		enableOptimizationBackend = false;
-	} else{
-		enableOptimizationBackend = true;
+	boolean enableOptimizationBackend = true;
+        int globalOp = 1;
+	if (args.length > 2) {
+		for(int i=2; i < args.length; i++) {
+			if(args[i].equals("-nf")) {
+
+				globalOp = 0;
+			}
+			else if (args[i].equals("-nb")) {
+				enableOptimizationBackend = false;
+			}
+		}
 	}
+
         // Test to read in txt file
         String filename = "phase3/test.txt";
         String[] fileLines = readFileToArray(filename);
         ArrayList<String> atoms = new ArrayList<String>();
 
-        int globalOp = 1;
 
         for (String line : fileLines) {
             atoms.add(line);
@@ -936,7 +943,9 @@ public static void peepholeOptimizeLoadStore() {
 
         if (globalOp == 1) {
             atoms = globalOptimizer(atoms);
-        }
+        } else {
+		System.out.println("Skipping Frontend Optimization!");
+	}
 
         // Create something to store labels and variables
         createFixupTable(atoms);
@@ -994,7 +1003,7 @@ public static void peepholeOptimizeLoadStore() {
 	        // Apply optimizations if enabled
 	
 	        if (enableOptimizationBackend) {
-	            optimizeLoadStore(); // Another example optimization
+	            peepholeOptimizeLoadStore(); // Another example optimization
 	        } else {
 			System.out.println("Skipping backend optimization!");
 		}

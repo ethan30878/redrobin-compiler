@@ -41,15 +41,9 @@ class CompilerPipeline {
 			Scanner.main(inputArg);
 			System.out.println("\nPhase 2 Parser:\n");
 			Parser.main(new String[0]);
-			if(noBackend==true){
-				String[] outputArg = new String[] {args[1],"true"};
-				System.out.println("\nPhase 3 Compiler (no Backend Op):\n");
-				phase3.Compiler.main(outputArg);
-			} else {
-				String[] outputArg = new String[] {args[1]};
-				System.out.println("\nPhase 3 Compiler:\n");
-				phase3.Compiler.main(outputArg);
-			}
+			System.out.println("\nPhase 3 Compiler:\n");
+			phase3.Compiler.main(args);
+			
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
