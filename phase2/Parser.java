@@ -15,7 +15,10 @@
 package phase2;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -826,7 +829,7 @@ public class Parser {
 		Queue<Token> tokensTest = new LinkedList<>();
 	
 		// Read the file
-		String filename = "phase2/ifTest.txt";
+		String filename = "scannerOut.txt";
 		String[] fileLines = readFileToArray(filename);
 	
 		// Process each line and add tokens to the queue
@@ -888,10 +891,19 @@ public class Parser {
 		System.out.println("		ATOMS");
 		System.out.println("/////////////////////////////////////////////");
 		System.out.println("");
-	
-		while (!atoms.isEmpty()) {
-			System.out.println(atoms.remove());
-		}
+		try {
+			File output = new File("atoms.txt");
+			BufferedWriter w = new BufferedWriter(new FileWriter(output));
+
+			while (!atoms.isEmpty()) {
+				String a = atoms.remove();
+				System.out.println(a);
+				w.write(a);
+			}
+			w.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}	
 	}
 	
 }

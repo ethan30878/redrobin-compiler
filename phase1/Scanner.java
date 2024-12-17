@@ -43,14 +43,13 @@ public class Scanner {
                                         System.out.println(tokenIdentifier);
                                 }
                         }
+			@Override
 			public String toString() {
 				StringBuilder s = new StringBuilder();
                                 if (tokenIdentifier.equals("INT_LITERAL") || tokenIdentifier.equals("FLOAT_LITERAL") || tokenIdentifier.equals("IDENTIFIER")) {
-                                        //System.out.println(tokenIdentifier + " Data:  " + Data);
-					s.append(tokenIdentifier + " Data:  " + Data);
+					s.append(tokenIdentifier + ": " + Data);
 					s.append("\n");
 				} else {
-					//System.out.println(tokenIdentifier);
 					s.append(tokenIdentifier);
 					s.append("\n");
 				}
@@ -653,7 +652,9 @@ public class Scanner {
 		File outFile = new File("scannerOut.txt");
 		BufferedWriter w = new BufferedWriter(new FileWriter(outFile));
                 while (!tokens.isEmpty()) {
-			w.write(tokens.remove().toString());
+			Token a = tokens.remove();
+			a.print();
+			w.write(a.toString());
                 }
 		w.close();
 
