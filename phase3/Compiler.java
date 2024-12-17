@@ -3,6 +3,7 @@ package phase3;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -657,6 +658,7 @@ public class Compiler {
     /**
      * Author: Alejandro Santiago
      * Implements the TST instruction.
+     * 
      * @param input The atom string
      * @return Machine code for TST
      */
@@ -665,11 +667,11 @@ public class Compiler {
         String opcodeJmp = "0101"; // JMP opcode
         String cmp = pad(decimalToBinary(Integer.parseInt(input.split(",")[4])), 4); // Flag for CMP
         String[] splitInput = input.split(",");
-    
-        String var = splitInput[1];  // Variable to compare
+
+        String var = splitInput[1]; // Variable to compare
         String value = splitInput[2]; // Comparison value
         String label = splitInput[5].substring(0, splitInput[5].length() - 1); // Label to jump to
-    
+
         // Find memory location of the variable
         String memVar = "";
         for (List<String> row : labelTable) {
@@ -677,7 +679,7 @@ public class Compiler {
                 memVar = row.get(2);
             }
         }
-    
+
         // Store the comparison value in memory
         lblAdress += 4;
         List<String> newLabel = new ArrayList<>();
@@ -686,12 +688,13 @@ public class Compiler {
         newLabel.add(String.valueOf(lblAdress));
         labelTable.add(newLabel);
 
-        //store the value we are comparing to, generate sto instruction
+        // store the value we are comparing to, generate sto instruction
         stoConv(String.valueOf(lblAdress));
-    
+
         // Generate CMP instruction
-        String cmpInstruction = "CMP -> " + opcodeCmp + "/" + cmp + "/" + pad(decimalToBinary(Integer.parseInt(memVar)), 4) + "/" + pad(decimalToBinary(lblAdress), 20);
-    
+        String cmpInstruction = "CMP -> " + opcodeCmp + "/" + cmp + "/"
+                + pad(decimalToBinary(Integer.parseInt(memVar)), 4) + "/" + pad(decimalToBinary(lblAdress), 20);
+
         // Generate JMP instruction based on label
         String memLabel = "";
         for (List<String> row : fixupTable) {
@@ -699,16 +702,12 @@ public class Compiler {
                 memLabel = row.get(1);
             }
         }
-        
-        String jmpInstruction = "JMP -> " + opcodeJmp + "/0000/0000/" + pad(decimalToBinary(Integer.parseInt(memLabel)), 20);
-    
+
+        String jmpInstruction = "JMP -> " + opcodeJmp + "/0000/0000/"
+                + pad(decimalToBinary(Integer.parseInt(memLabel)), 20);
+
         return cmpInstruction + "\n" + jmpInstruction;
     }
-    
-    
-    
-    
-
 
     static String decimalToBinary(int num) {
 
@@ -813,6 +812,104 @@ public class Compiler {
         }
     }
 
+    // public static ArrayList<String> globalOptomizer(ArrayList<String> oldArray) {
+
+    // ArrayList<String> newArray = new ArrayList<String>();
+
+    // String lastAtom = "";
+
+    // for (String atom : oldArray) {
+
+    // if (!lastAtom.contains("CMP") && atom.contains("JMP")) {
+
+    // newArray.add(atom);
+
+    // return newArray;
+    // }
+
+    // newArray.add(atom);
+
+    // lastAtom = atom;
+
+    // }
+
+    // return newArray;
+    // }
+
+    public static ArrayList<String> globalOptimizer(ArrayList<String> oldArray) {
+
+        // Instantiate Arrays / Variables
+        ArrayList<String> newArray = new ArrayList<String>();
+        ArrayList<String> labels = new ArrayList<String>();
+        int deadCodeFlag = 0;
+
+        // Loop through atoms
+        for (String atom : oldArray) {
+
+            // Check if the atom is a label
+            if (atom.contains("LBL")) {
+
+                // Add the atom to the return array
+                deadCodeFlag = 0;
+                newArray.add(atom);
+
+                // Add the label to the labels array
+                String[] splitInput = atom.split(",");
+                labels.add(splitInput[5].substring(0, splitInput[5].length() - 1));
+                continue;
+
+            }
+
+            // Check if the atom is a jump
+            if (atom.contains("JMP")) {
+
+                // Get the label name
+                String[] splitInput = atom.split(",");
+                String labelName = splitInput[5].substring(0, splitInput[5].length() - 1);
+
+                // If the label is in the labels array, add the atom to the return array
+                if (labels.contains(labelName)) {
+
+                    deadCodeFlag = 1;
+                    newArray.add(atom);
+                    continue;
+
+                }
+
+            }
+
+            // Check if the atom is a jump
+            if (atom.contains("TST")) {
+
+                // Get the label name
+                String[] splitInput = atom.split(",");
+                String labelName = splitInput[5].substring(0, splitInput[5].length() - 1);
+
+                // If the label is in the labels array, add the atom to the return array
+                if (labels.contains(labelName)) {
+
+                    deadCodeFlag = 1;
+                    newArray.add(atom);
+                    continue;
+
+                }
+
+            }
+
+            // Dead code checker
+            if (deadCodeFlag == 1) {
+
+                continue;
+
+            }
+
+            newArray.add(atom);
+
+        }
+
+        return newArray;
+    }
+
     public static void main(String[] args) {
 
         // Test to read in txt file
@@ -820,16 +917,22 @@ public class Compiler {
         String[] fileLines = readFileToArray(filename);
         ArrayList<String> atoms = new ArrayList<String>();
 
+        int globalOp = 1;
+
         for (String line : fileLines) {
             atoms.add(line);
+        }
+
+        if (globalOp == 1) {
+            atoms = globalOptimizer(atoms);
         }
 
         // Create something to store labels and variables
         createFixupTable(atoms);
 
+        System.out.println("Atoms: \n" + atoms);
+
         for (String atom : atoms) {
-            // TODO: Convert atoms to their respective instructions
-            // ex: MOV, TST, LBL (?), CMP are not atoms, but instructions
 
             if (atom.substring(1, 4).equals("CLR")) {
                 // binOut.add(clrConv(atom));
@@ -844,18 +947,12 @@ public class Compiler {
             } else if (atom.substring(1, 4).equals("JMP")) {
                 binOut.add(jmpConv(atom));
             } else if (atom.substring(1, 4).equals("CMP")) {
-                // binOut.add(cmpConv(atom));
-//            } else if (atom.substring(1, 4).equals("LOD")) {
-//                binOut.add(lodConv(atom));
-//            } else if (atom.substring(1, 4).equals("STO")) {
-//                // binOut.add(stoConv(atom));
-//            } else if (atom.substring(1, 4).equals("HLT")) {
-//                binOut.add(hltConv(atom));
-//            } else if (atom.substring(1, 4).equals("MOV")) {
-//                movConv(atom);
+                binOut.add(cmpConv(atom));
+            } else if (atom.substring(1, 4).equals("MOV")) {
+                // movConv(atom);
             } else if (atom.substring(1, 4).equals("LBL")) {
-                //lblConv(atom);
-            }else if (atom.substring(1, 4).equals("TST")) {
+                // lblConv(atom);
+            } else if (atom.substring(1, 4).equals("TST")) {
                 binOut.add(tstConv(atom));
             }
         }
