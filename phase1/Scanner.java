@@ -34,7 +34,7 @@ class Scanner {
 
                         public void print() {
                                 if (tokenIdentifier.equals("INT_LITERAL") || tokenIdentifier.equals("FLOAT_LITERAL") || tokenIdentifier.equals("IDENTIFIER")) {
-                                        System.out.println(tokenIdentifier + " Data:" + Data);
+                                        System.out.println(tokenIdentifier + ": " + Data);
                                 } else {
                                         System.out.println(tokenIdentifier);
                                 }
@@ -548,6 +548,7 @@ class Scanner {
 			stringBuilder.append(line);
 		}
 		String input = stringBuilder.toString();
+
                 // Instantiate index for the transition table
                 int currentState = 0;
 
@@ -577,15 +578,22 @@ class Scanner {
                                         break;
                                 }
 
-                                if (finalStates.get(currentState).equals("INT_LITERAL")|| finalStates.get(currentState).equals("FLOAT_LITERAL")) {
-                                        if (!(currentChar.equals(" ")|| currentChar.equals(";")|| currentChar.equals(")")|| currentChar.equals("(")|| currentChar.equals("{")|| currentChar.equals("}"))) {
-                                                System.out.println("\n Invalid State Detected");
-                                                break;
+                                if (finalStates.get(currentState).equals("INT_LITERAL") || finalStates.get(currentState).equals("FLOAT_LITERAL")) {
+                                        // Check if the current character is NOT a valid delimiter for numbers
+                                        if (!(currentChar.equals(" ") || currentChar.equals(";") || currentChar.equals(")")
+                                              || currentChar.equals("(") || currentChar.equals("{") || currentChar.equals("}")
+                                              || currentChar.equals("+") || currentChar.equals("-") || currentChar.equals("*")
+                                              || currentChar.equals("/") )) {
+                                            System.out.println("\n Invalid State Detected");
+                                            break;
                                         }
                                 }
 
-                                data = input.substring(bookmark, i);
-                                Token toAdd = new Token(finalStates.get(currentState),data);
+                              
+
+                                // With this minimal adjustment:
+                                data = input.substring(bookmark, i).trim(); // Trim the token here
+                                Token toAdd = new Token(finalStates.get(currentState), data);
                                 tokens.add(toAdd);
 
                                 bookmark = i;
