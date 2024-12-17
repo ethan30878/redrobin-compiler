@@ -733,10 +733,9 @@ public class Compiler {
         String lastLoadMem = null; // Last loaded memory location
 
         for (String instr : binOut) {
-            if (instr.startsWith("STO ->")) {
-                String[] parts = instr.split("/");
-                String storeReg = parts[2].trim();
-                String storeMem = parts[3].trim();
+            if (instr.startsWith("1000")) {
+                String storeReg = instr.substring(8, 11);
+                String storeMem = instr.substring(12, 31);
 
                 // If the value was already stored in the same memory location, skip this STO
                 if (lastStoreMem != null && lastStoreMem.equals(storeMem) && lastLoadReg.equals(storeReg)) {
@@ -746,10 +745,9 @@ public class Compiler {
                 // Update lastStoreMem and add STO to optimized output
                 lastStoreMem = storeMem;
                 optimizedBinOut.add(instr);
-            } else if (instr.startsWith("LOD ->")) {
-                String[] parts = instr.split("/");
-                String loadReg = parts[2].trim();
-                String loadMem = parts[3].trim();
+            } else if (instr.startsWith("0111")) {
+                String loadReg = instr.substring(8, 11);
+                String loadMem = instr.substring(12, 31);
 
                 // If the value in memory has not changed, skip this redundant LOD
                 if (lastStoreMem != null && lastStoreMem.equals(loadMem)) {
