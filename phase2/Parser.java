@@ -306,42 +306,38 @@ public class Parser {
 
 	public void parseStatement() {
 
+		if (currentToken == null) {
+			return; // Safely exit if no tokens are left
+		}
+	
 		if (currentToken.tokenIdentifier.equals("IF_KEYWORD")) {
-
 			parseBranch();
-
 		} else if (currentToken.tokenIdentifier.equals("IDENTIFIER")
 				|| currentToken.tokenIdentifier.equals("INT_LITERAL")
 				|| currentToken.tokenIdentifier.equals("FLOAT_LITERAL")
 				|| currentToken.tokenIdentifier.equals("LEFT_PARANTHESIS")) {
-
 			parseAssign();
-
 		} else if (currentToken.tokenIdentifier.equals("LET_KEYWORD")) {
-
 			parseDecl();
-
 		} else if (currentToken.tokenIdentifier.equals("FOR_KEYWORD")) {
-
 			parseFor();
-
 		} else if (currentToken.tokenIdentifier.equals("WHILE_KEYWORD")) {
-
 			parseWhile();
-
+		} else if (currentToken.tokenIdentifier.equals("RIGHT_CURLY_BRACKET")) {
+			// Safely return on block end
+			return;
 		} else {
-
-			parseStatements();
-
+			throw new RuntimeException("Unexpected token: " + currentToken.tokenIdentifier);
 		}
 	}
+	
 
 	public void parseStatements() {
-
-		while (currentToken != null) {
+		while (currentToken != null && !currentToken.tokenIdentifier.equals("RIGHT_CURLY_BRACKET")) {
 			parseStatement();
 		}
 	}
+	
 
 	public void parseBranch() {
 

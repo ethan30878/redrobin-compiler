@@ -727,46 +727,45 @@ public class Compiler {
     /**
  * Optimizes the generated machine code by removing redundant LOD and STO instructions.
  */
-public static void optimizeLoadStore() {
+public static void peepholeOptimizeLoadStore() {
     List<String> optimizedBinOut = new ArrayList<>();
-    String lastInstruction = ""; // Stores the last instruction for comparison.
+    String lastStoreMem = null; // Last STO memory location
+    String lastLoadReg = null;  // Last loaded register
+    String lastLoadMem = null;  // Last loaded memory location
 
     for (String instr : binOut) {
-        if (instr.startsWith("LOD ->")) {
-            // Save the current LOD instruction for comparison
-            lastInstruction = instr;
-        } else if (instr.startsWith("STO ->")) {
-            // If the last instruction is a LOD and they share the same memory address, skip both
-            if (!lastInstruction.isEmpty() && lastInstruction.startsWith("LOD ->")) {
-                String[] loadParts = lastInstruction.split("/");
-                String[] storeParts = instr.split("/");
+        if (instr.startsWith("STO ->")) {
+            String[] parts = instr.split("/");
+            String storeReg = parts[2].trim();
+            String storeMem = parts[3].trim();
 
-                if (loadParts.length > 3 && storeParts.length > 3) {
-                    String loadMem = loadParts[3]; // Memory address from LOD
-                    String storeMem = storeParts[3]; // Memory address from STO
-
-                    if (loadMem.equals(storeMem)) {
-                        // Skip both instructions, reset lastInstruction
-                        lastInstruction = "";
-                        continue;
-                    }
-                }
+            // If the value was already stored in the same memory location, skip this STO
+            if (lastStoreMem != null && lastStoreMem.equals(storeMem) && lastLoadReg.equals(storeReg)) {
+                continue; // Redundant STO
             }
-            // Add the STO if it wasn't skipped
+
+            // Update lastStoreMem and add STO to optimized output
+            lastStoreMem = storeMem;
+            optimizedBinOut.add(instr);
+        } else if (instr.startsWith("LOD ->")) {
+            String[] parts = instr.split("/");
+            String loadReg = parts[2].trim();
+            String loadMem = parts[3].trim();
+
+            // If the value in memory has not changed, skip this redundant LOD
+            if (lastStoreMem != null && lastStoreMem.equals(loadMem)) {
+                continue; // Redundant LOD
+            }
+
+            // Update lastLoadMem and lastLoadReg
+            lastLoadMem = loadMem;
+            lastLoadReg = loadReg;
             optimizedBinOut.add(instr);
         } else {
-            // Add non-LOD/STO instructions directly to the optimized list
-            if (!lastInstruction.isEmpty()) {
-                optimizedBinOut.add(lastInstruction); // Add the pending LOD
-                lastInstruction = ""; // Reset the last instruction
-            }
+            // Reset tracking for STO/LOD optimizations on any other instruction
+            lastStoreMem = null;
             optimizedBinOut.add(instr);
         }
-    }
-
-    // If there's a leftover last LOD, add it (unlikely, but for safety)
-    if (!lastInstruction.isEmpty()) {
-        optimizedBinOut.add(lastInstruction);
     }
 
     binOut = optimizedBinOut;
@@ -951,8 +950,8 @@ public static void optimizeLoadStore() {
          // Apply optimizations if enabled
 
          if (enableOptimizationBackend) {
-            optimizeLoadStore(); // Another example optimization
-        }
+            peepholeOptimizeLoadStore();
+         }
         System.out.println("Machine Code:");
 
         // Print each string in the list
