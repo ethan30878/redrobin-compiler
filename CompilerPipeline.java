@@ -1,27 +1,42 @@
 import phase3.*;
 import phase2.*;
-import phase1.*;
+import phase1.Scanner;
+import java.io.*;
 
-import java.util.Scanner;
+//import java.util.Scanner;
 import java.io.File;
 
 class CompilerPipeline {
 
 
 	public static void main(String args[]) {
-		Scanner sc = new Scanner(System.in);
-		while(true) {
-			System.out.println("Enter input file: ");
-			String inputFile = sc.nextLine();
-			File f = new File(inputFile);
-			if(f.exists() && !f.isDirectory()) {
-				break;
-			}else {
-				System.out.println("File does not exist. Please Try again: ");
-			}
+
+		if(args.length < 2) {
+			System.out.println("Not enough inputs provided. Please see the help menu.");	
+			//print help menu
+			System.exit(0);
+		}		
+		File input = new File(args[0]);
+		if(!input.exists() || input.isDirectory()) {
+			System.out.println("Input file does not exist. Please Try again. ");
+			System.exit(0);
+		}
+		System.out.println(args[0]);
+		
+		if (args.length >2){
+			//Parse additional args
+			//
 
 		}
-		System.out.println("Enter output file: ");
-		String outputFile = sc.nextLine();
+		try {
+			String[] inputArg = new String[] {args[0]};
+			Scanner.main(inputArg);
+			Parser.main(new String[]);
+			String[] outputArg = new String[] {args[1]};
+			Compiler.main(outputArg);
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 }

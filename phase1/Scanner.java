@@ -17,9 +17,13 @@ package phase1;
 
 import java.util.*;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.BufferedWriter;
+//import java.io.InputStreamReader;
 import java.io.IOException;
-class Scanner {
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+public class Scanner {
 
         public static void main(String args[]) throws IOException {
 
@@ -39,6 +43,20 @@ class Scanner {
                                         System.out.println(tokenIdentifier);
                                 }
                         }
+			public String toString() {
+				StringBuilder s = new StringBuilder();
+                                if (tokenIdentifier.equals("INT_LITERAL") || tokenIdentifier.equals("FLOAT_LITERAL") || tokenIdentifier.equals("IDENTIFIER")) {
+                                        //System.out.println(tokenIdentifier + " Data:  " + Data);
+					s.append(tokenIdentifier + " Data:  " + Data);
+					s.append("\n");
+				} else {
+					//System.out.println(tokenIdentifier);
+					s.append(tokenIdentifier);
+					s.append("\n");
+				}
+				return s.toString();
+			}
+
                 }
 
                 // Instatiate dictionary and table
@@ -535,13 +553,13 @@ class Scanner {
 
                 };
 
-                // Printing read in statement
-                System.out.println("Enter a statement: ");
 
                 // Read in statement
                 //String input = System.console().readLine();
 		StringBuilder stringBuilder = new StringBuilder();
-        	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in)); 
+
+		File file = new File(args[0]);
+        	BufferedReader stdin = new BufferedReader(new FileReader(file)); 
 		String line;
 		while ((line = stdin.readLine()) != null && line.length()!= 0) { 
 			stringBuilder.append(line);
@@ -623,8 +641,12 @@ class Scanner {
                 }
 
                 System.out.println();
+		File outFile = new File("scannerOut.txt");
+		BufferedWriter w = new BufferedWriter(new FileWriter(outFile));
                 while (!tokens.isEmpty()) {
-                        tokens.remove().print();
+			w.write(tokens.remove().toString());
                 }
+		w.close();
+
         }
 }
