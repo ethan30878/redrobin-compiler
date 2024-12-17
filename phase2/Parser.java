@@ -38,7 +38,7 @@ public class Parser {
 
 		@Override
 		public String toString() {
-			return tokenIdentifier + " Data:  " + data;
+			return tokenIdentifier + ":  " + data;
 		}
 	}
 	
@@ -903,6 +903,7 @@ public class Parser {
 				String a = atoms.remove();
 				System.out.println(a);
 				w.write(a);
+				w.write("\n");
 			}
 			w.close();
 		}catch(IOException e){

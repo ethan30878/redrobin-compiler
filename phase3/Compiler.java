@@ -1,7 +1,10 @@
 package phase3;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -17,9 +20,6 @@ public class Compiler {
     public static List<List<String>> labelTable = new ArrayList<>();
     public static List<String> binOut = new ArrayList<>();
 
-    // flags for optimizations
-    public static boolean enableOptimizationBackend = true;
-    public static boolean enableOptimizationFrontEnd = false;
 
     /**
      * Author: Jee McCloud
@@ -920,7 +920,12 @@ public class Compiler {
     }
 
     public static void main(String[] args) {
-
+	boolean enableOptimizationBackend;
+	if (args.length > 1) {
+		enableOptimizationBackend = false;
+	} else{
+		enableOptimizationBackend = true;
+	}
         // Test to read in txt file
         String filename = "phase3/test.txt";
         String[] fileLines = readFileToArray(filename);
@@ -964,10 +969,6 @@ public class Compiler {
             }
         }
 
-        // if (enableOptimizationFrontEnd)
-        // {
-        // //here you would optimize the front end flag
-        // }
 
         System.out.println("Fixup Table:");
 
@@ -978,29 +979,39 @@ public class Compiler {
 
         System.out.println("Label Table:");
 
-        for (List<String> item : labelTable)
-            System.out.println(item);
+        //for (List<String> item : labelTable)
+        //    System.out.println(item);
 
-        System.out.println();
+        //System.out.println();
 
-        System.out.println("Machine Code:");
-
-        // Print each string in the list
-        for (String item : binOut) {
-            System.out.println(item);
-        }
-        System.out.println();
-        // Apply optimizations if enabled
-
-        if (enableOptimizationBackend) {
-            optimizeLoadStore(); // Another example optimization
-        }
-        System.out.println("Machine Code:");
-
-        // Print each string in the list
-        for (String item : binOut) {
-            System.out.println(item);
-        }
-
+        //System.out.println("Machine Code:");
+	
+	try {
+		File out = new File(args[0]);
+		BufferedWriter w = new BufferedWriter(new FileWriter(out));
+	        // Print each string in the list
+	        for (String item : binOut) {
+	            System.out.println(item);
+	        }
+	        System.out.println();
+	        // Apply optimizations if enabled
+	
+	        if (enableOptimizationBackend) {
+	            optimizeLoadStore(); // Another example optimization
+	        } else {
+			System.out.println("Skipping backend optimization!");
+		}
+	        System.out.println("Machine Code:");
+	
+	        // Print each string in the list
+	        for (String item : binOut) {
+	            System.out.println(item);
+		    w.write(item);
+		    w.write("\n");
+	        }
+		w.close();	
+	}catch(IOException e) {
+		e.printStackTrace();
+	}
     }
 }
