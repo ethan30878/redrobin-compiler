@@ -38,7 +38,7 @@ public class Parser {
 			return tokenIdentifier + " Data:  " + data;
 		}
 	}
-
+	
 	Queue<Token> tokens;
 	static Queue<String> atoms = new LinkedList<String>();
 	static int LHS = 0;
@@ -54,18 +54,22 @@ public class Parser {
 
 	private void advance() {
 		currentToken = tokens.poll();
+		if (currentToken == null) {
+			System.out.println("Warning: No more tokens available.");
+		}
 	}
+	
 
 	public void parse() {
 
 		// Get the first token
 		currentToken = tokens.poll();
 		// Start parsing the expression
-		parseStatement();
+		parseStatements();
 
 	}
 
-	int tempValue = 0;
+	int tempValue = 1; // Start from 1 to avoid T-1
 
 	private void parseDecl() {
 
@@ -123,66 +127,66 @@ public class Parser {
 
 		match("SEMICOLON");
 		advance();
-		atoms.add("(MOV,,,,," + result + ", " + Ident + ")");
+		atoms.add("(MOV," + result + ",," + Ident + ")");
 
 	}
-
 	public void parseAssign() {
-
 		Token id = match("IDENTIFIER");
-
 		advance();
-
+	
 		match("ASSIGNMENT_OPERATOR");
-
 		advance();
-
+	
 		String result = parseExpr();
-		result = createExprAtoms(result);
-
+	
+		// Directly assign literals without using a temporary variable
+		if (result.matches("^[0-9]+$")) { // If result is a literal (integer)
+			atoms.add("(MOV," + result + ",," + id.data + ")");
+		} else {
+			// If it's an expression, result is already a temp (e.g., T1, T2, ...)
+			atoms.add("(MOV," + result + ",," + id.data + ")");
+		}
+	
 		match("SEMICOLON");
-
 		advance();
-
-		atoms.add("(MOV,,,,," + result + ", " + id + ")");
-
 	}
+	
+	
+	
+	
+		
 
-	public String parseBase() {
-
-		LHS++;
-
-		if (currentToken.tokenIdentifier.equals("INT_LITERAL") || currentToken.tokenIdentifier.equals("FLOAT_LITERAL")
-				|| currentToken.tokenIdentifier.equals("IDENTIFIER")) {
-
-			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
-			String toRet = currentToken.data;
-			advance();
-			return toRet;
-
-		} else if (currentToken.tokenIdentifier.equals("LEFT_PARANTHESIS")) {
-
-			match("LEFT_PARANTHESIS");
-
-			advance();
-
-			String result = parseExpr();
-			result = createExprAtoms(result);
-
-			match("RIGHT_PARANTHESIS");
-			advance();
-			return result;
-
-		}
-
-		else {
-
-			throw new RuntimeException(
+		public String parseBase() {
+			LHS++;
+		
+			if (currentToken.tokenIdentifier.equals("INT_LITERAL") || 
+				currentToken.tokenIdentifier.equals("FLOAT_LITERAL") || 
+				currentToken.tokenIdentifier.equals("IDENTIFIER")) {
+		
+				System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
+				String toRet = currentToken.data;
+				advance();
+				return toRet;
+		
+			} else if (currentToken.tokenIdentifier.equals("LEFT_PARANTHESIS")) {
+		
+				match("LEFT_PARANTHESIS");
+				advance();
+		
+				String result = parseExpr();
+				result = createExprAtoms(result);
+		
+				match("RIGHT_PARANTHESIS");
+				advance();
+				return result;
+		
+			} else {
+				throw new RuntimeException(
 					"Error: Expected int literal or identifier but got " + currentToken.tokenIdentifier);
-
+			}
 		}
-
-	}
+		
+	
 
 	// public void parseExpr() {
 	// tempValue++;
@@ -241,30 +245,36 @@ public class Parser {
 	// }
 
 	public String parseExpr() {
-		tempValue++;
-
-		String yep = parseAddSub();
-
-		if (currentToken.tokenIdentifier.equals("ADDITION_OPERATOR")
-				|| currentToken.tokenIdentifier.equals("SUBTRACTION_OPERATOR")) {
-
-			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
-			RHS++;
-			String operation = currentToken.data;
-			advance();
-			String yep2 = parseExpr();
-			if (operation.equals("+")) {
-				final String toRet = new String("(ADD," + yep2 + "," + yep + ")");
-				return toRet;
-			} else {
-				String toRet = new String("(SUB," + yep2 + "," + yep + ")");
-				return toRet;
-			}
-
+		String left = parseAddSub();
+		
+		// If no operations and 'left' is already an INT_LITERAL or IDENTIFIER, use it directly
+		if (!left.startsWith("T") && !left.matches("^[0-9]+$")) {
+			String tempVar = "T" + tempValue++;
+			atoms.add("(MOV," + left + ",," + tempVar + ")");
+			left = tempVar;
 		}
-
-		return yep;
+	
+		while (currentToken != null &&
+			   (currentToken.tokenIdentifier.equals("ADDITION_OPERATOR") ||
+				currentToken.tokenIdentifier.equals("SUBTRACTION_OPERATOR"))) {
+	
+			Token operatorToken = match(currentToken.tokenIdentifier);
+	
+			String operation = operatorToken.tokenIdentifier.equals("ADDITION_OPERATOR") ? "ADD" : "SUB";
+	
+			advance();
+			String right = parseAddSub();
+	
+			String tempVar = "T" + tempValue++;
+			atoms.add("(" + operation + "," + left + "," + right + "," + tempVar + ")");
+			left = tempVar;
+		}
+	
+		return left;
 	}
+	
+	
+	
 
 	public String parseAddSub() {
 
@@ -328,17 +338,9 @@ public class Parser {
 
 	public void parseStatements() {
 
-		// TODO: ADD IF FOR START OF ANY PRODUCTION
-		if (currentToken.tokenIdentifier.equals("LET_KEYWORD") || currentToken.tokenIdentifier.equals("IF_KEYWORD")
-				|| currentToken.tokenIdentifier.equals("IDENTIFIER")
-				|| currentToken.tokenIdentifier.equals("FOR_KEYWORD")
-				|| currentToken.tokenIdentifier.equals("WHILE_KEYWORD")
-				|| currentToken.tokenIdentifier.equals("LET_KEYWORD")) {
+		while (currentToken != null) {
 			parseStatement();
 		}
-
-		// TODO: ELSE THROW ERROR
-
 	}
 
 	public void parseBranch() {
@@ -613,48 +615,45 @@ public class Parser {
 
 	public String createExprAtoms(String OoOp) {
 		int tempsNeeded = 0;
-
+	
 		for (int i = 0; i < OoOp.length(); i++) {
 			if (OoOp.charAt(i) == ')') {
 				tempsNeeded++;
 			}
 		}
-
+	
 		for (int p = 0; p < tempsNeeded; p++) {
 			int end = 0;
 			int start = 0;
-
+	
 			for (int i = 0; i < OoOp.length(); i++) {
 				if (OoOp.charAt(i) == ')') {
-
 					end = i;
 					break;
 				}
 			}
-
-			String tempReg = "";
+	
+			String tempReg = ""; 
+			
 			for (int i = end; i > 0; i--) {
 				if (OoOp.charAt(i) == '(') {
 					start = i;
 					break;
 				}
 			}
-
-			String atom = OoOp.substring(start, end);
-
-			tempReg = "t" + p;
+	
+			String atom = OoOp.substring(start + 1, end); // Remove parentheses
 			atom += "," + tempReg + ")";
-
-			System.out.println("New String is: " + OoOp);
-			String temp = OoOp.substring(0, start) + tempReg + OoOp.substring(end + 1, OoOp.length());
+			String temp = OoOp.substring(0, start) + tempReg + OoOp.substring(end + 1);
 			OoOp = temp;
-
-			atoms.add(atom);
-
+	
+			atoms.add("(" + atom); // Add atom in correct format
 		}
-		return (new String("t" + (tempsNeeded - 1)));
-
+	
+		return "T" + (tempValue - 1); // Correctly return the last temp variable
 	}
+	
+	
 
 	public static String[] readFileToArray(String filename) {
 		ArrayList<String> lines = new ArrayList<>();
@@ -671,110 +670,232 @@ public class Parser {
 		return lines.toArray(new String[0]);
 	}
 
+	// public static void main(String[] args) {
+
+	// 	// Test to read in txt file
+	// 	Queue<Token> tokensTest = new LinkedList<>();
+	// 	String filename = "phase2/ifTest.txt";
+	// 	String[] fileLines = readFileToArray(filename);
+
+	// 	// for (String line : fileLines) {
+	// 	// 	String[] lineTokens = line.split(" ");
+	// 	// 	String identifier = lineTokens[0].trim();
+	// 	// 	String data = lineTokens[1].trim();
+	// 	// 	tokensTest.add(new Token(identifier, data));
+	// 	// }
+	// 	for (String line : fileLines) {
+	// 		String[] lineTokens = line.split(" ");
+	// 		String identifier = lineTokens[0].trim();
+	// 		String data;
+		
+	// 		// If the line contains data, use it
+	// 		if (lineTokens.length > 1) {
+	// 			data = lineTokens[1].trim();
+	// 		} else {
+	// 			// Automatically fill in data for known single-token types
+	// 			switch (identifier) {
+	// 				case "ADDITION_OPERATOR":
+	// 					data = "+";
+	// 					break;
+	// 				case "SUBTRACTION_OPERATOR":
+	// 					data = "-";
+	// 					break;
+	// 				case "MULTIPLICATION_OPERATOR":
+	// 					data = "*";
+	// 					break;
+	// 				case "DIVISION_OPERATOR":
+	// 					data = "/";
+	// 					break;
+	// 				case "LEFT_PARANTHESIS":
+	// 					data = "(";
+	// 					break;
+	// 				case "RIGHT_PARANTHESIS":
+	// 					data = ")";
+	// 					break;
+	// 				case "LEFT_CURLY_BRACKET":
+	// 					data = "{";
+	// 					break;
+	// 				case "RIGHT_CURLY_BRACKET":
+	// 					data = "}";
+	// 					break;
+	// 				default:
+	// 					data = ""; // Default to empty if no specific data is required
+	// 			}
+	// 		}
+	// 		tokensTest.add(new Token(identifier, data));
+	// 	}
+	// 	System.out.println();
+	// 	// System.out.println("Token Test: " + tokensTest);
+	// 	System.out.println();
+
+	// 	// Test for while loop
+	// 	Queue<Token> whileTest = new LinkedList<>();
+	// 	whileTest.add(new Token("WHILE_KEYWORD", "while"));
+	// 	whileTest.add(new Token("LEFT_PARANTHESIS", "("));
+	// 	whileTest.add(new Token("IDENTIFIER", "y"));
+	// 	whileTest.add(new Token("GREATER_THAN_OPERATOR", ">"));
+	// 	whileTest.add(new Token("INT_LITERAL", "5"));
+	// 	whileTest.add(new Token("RIGHT_PARANTHESIS", ")"));
+	// 	whileTest.add(new Token("LEFT_CURLY_BRACKET", "{"));
+
+	// 	whileTest.add(new Token("LET_KEYWORD", "let"));
+	// 	whileTest.add(new Token("IDENTIFIER", "id"));
+	// 	whileTest.add(new Token("COLON", ":"));
+	// 	whileTest.add(new Token("MUT_KEYWORD", "mut"));
+	// 	whileTest.add(new Token("I32_KEYWORD", "i32"));
+	// 	whileTest.add(new Token("ASSIGNMENT_OPERATOR", "="));
+
+	// 	whileTest.add(new Token("IDENTIFIER", "y"));
+	// 	whileTest.add(new Token("MULTIPLICATION_OPERATOR", "*"));
+	// 	whileTest.add(new Token("LEFT_PARANTHESIS", "("));
+	// 	whileTest.add(new Token("IDENTIFIER", "x"));
+	// 	whileTest.add(new Token("ADDITION_OPERATOR", "+"));
+	// 	whileTest.add(new Token("IDENTIFIER", "y"));
+	// 	whileTest.add(new Token("DIVISION_OPERATOR", "/"));
+	// 	whileTest.add(new Token("IDENTIFIER", "z"));
+
+	// 	whileTest.add(new Token("ADDITION_OPERATOR", "+"));
+	// 	whileTest.add(new Token("IDENTIFIER", "i"));
+	// 	whileTest.add(new Token("RIGHT_PARANTHESIS", ")"));
+	// 	whileTest.add(new Token("SEMICOLON", ";"));
+
+	// 	whileTest.add(new Token("RIGHT_CURLY_BRACKET", "}"));
+
+	// 	// Test for for loop
+	// 	Queue<Token> forTest = new LinkedList<>();
+	// 	// forTest.add(new Token("IDENTIFIER", "a"));
+	// 	// forTest.add(new Token("ASSIGNMENT_OPERATOR", "="));
+	// 	// forTest.add(new Token("IDENTIFIER", "a"));
+	// 	// forTest.add(new Token("ADDITION_OPERATOR", "+"));
+	// 	// forTest.add(new Token("IDENTIFIER", "b"));
+	// 	// forTest.add(new Token("SUBTRACTION_OPERATOR", "-"));
+	// 	// forTest.add(new Token("IDENTIFIER", "c"));
+
+	// 	// forTest.add(new Token("FOR_KEYWORD", "for"));
+	// 	// forTest.add(new Token("LEFT_PARANTHESIS", "("));
+	// 	// forTest.add(new Token("IDENTIFIER", "y"));
+	// 	// forTest.add(new Token("IN_KEYWORD", "in"));
+	// 	// forTest.add(new Token("INT_LITERAL", "5"));
+	// 	// forTest.add(new Token("INT_LITERAL", "15"));
+	// 	// forTest.add(new Token("RIGHT_PARANTHESIS", ")"));
+	// 	// forTest.add(new Token("LEFT_CURLY_BRACKET", "{"));
+
+	// 	// forTest.add(new Token("LET_KEYWORD", "let"));
+	// 	// forTest.add(new Token("IDENTIFIER", "id"));
+	// 	// forTest.add(new Token("COLON", ":"));
+	// 	// forTest.add(new Token("MUT_KEYWORD", "mut"));
+	// 	// forTest.add(new Token("I32_KEYWORD", "i32"));
+	// 	// forTest.add(new Token("ASSIGNMENT_OPERATOR", "="));
+
+	// 	// forTest.add(new Token("IDENTIFIER", "y"));
+	// 	// forTest.add(new Token("MULTIPLICATION_OPERATOR", "*"));
+	// 	// forTest.add(new Token("LEFT_PARANTHESIS", "("));
+	// 	// forTest.add(new Token("IDENTIFIER", "x"));
+	// 	// forTest.add(new Token("ADDITION_OPERATOR", "+"));
+	// 	// forTest.add(new Token("IDENTIFIER", "y"));
+	// 	// forTest.add(new Token("DIVISION_OPERATOR", "/"));
+	// 	// forTest.add(new Token("IDENTIFIER", "z"));
+
+	// 	// forTest.add(new Token("ADDITION_OPERATOR", "+"));
+	// 	// forTest.add(new Token("IDENTIFIER", "i"));
+	// 	// forTest.add(new Token("RIGHT_PARANTHESIS", ")"));
+	// 	// forTest.add(new Token("SEMICOLON", ";"));
+
+	// 	// forTest.add(new Token("RIGHT_CURLY_BRACKET", "}"));
+
+	// 	System.out.println("");
+	// 	System.out.println("/////////////////////////////////////////////");
+	// 	System.out.println("		PARSER");
+	// 	System.out.println("/////////////////////////////////////////////");
+	// 	System.out.println("");
+
+	// 	Parser parser = new Parser(forTest);
+	// 	parser.parse();
+
+	// 	System.out.println("");
+	// 	System.out.println("/////////////////////////////////////////////");
+	// 	System.out.println("		ATOMS");
+	// 	System.out.println("/////////////////////////////////////////////");
+	// 	System.out.println("");
+
+	// 	while (!atoms.isEmpty()) {
+	// 		System.out.println(atoms.remove());
+	// 	}
+
+	// }
+
 	public static void main(String[] args) {
 
-		// Test to read in txt file
+		// Queue to hold tokens generated from the file
 		Queue<Token> tokensTest = new LinkedList<>();
+	
+		// Read the file
 		String filename = "phase2/ifTest.txt";
 		String[] fileLines = readFileToArray(filename);
-
+	
+		// Process each line and add tokens to the queue
 		for (String line : fileLines) {
-			String[] lineTokens = line.split(" ");
+			String[] lineTokens = line.split(":", 2); // Split only at the first colon
 			String identifier = lineTokens[0].trim();
-			String data = lineTokens[1].trim();
-			tokensTest.add(new Token(identifier, data));
+			String data = (lineTokens.length > 1) ? lineTokens[1].trim() : "";
+			tokensTest.add(new Token(identifier, data));		
+	
+			// // If the line contains data, use it
+			// if (lineTokens.length > 1) {
+			// 	data = lineTokens[1].trim();
+			// } else {
+			// 	// Automatically fill in data for known single-token types
+			// 	switch (identifier) {
+			// 		case "ADDITION_OPERATOR":
+			// 			data = "+";
+			// 			break;
+			// 		case "SUBTRACTION_OPERATOR":
+			// 			data = "-";
+			// 			break;
+			// 		case "MULTIPLICATION_OPERATOR":
+			// 			data = "*";
+			// 			break;
+			// 		case "DIVISION_OPERATOR":
+			// 			data = "/";
+			// 			break;
+			// 		case "LEFT_PARANTHESIS":
+			// 			data = "(";
+			// 			break;
+			// 		case "RIGHT_PARANTHESIS":
+			// 			data = ")";
+			// 			break;
+			// 		case "LEFT_CURLY_BRACKET":
+			// 			data = "{";
+			// 			break;
+			// 		case "RIGHT_CURLY_BRACKET":
+			// 			data = "}";
+			// 			break;
+			// 		default:
+			// 			data = ""; // Default to empty if no specific data is required
+			// 	}
+			// }
+			// tokensTest.add(new Token(identifier, data));
 		}
-
-		System.out.println();
-		// System.out.println("Token Test: " + tokensTest);
-		System.out.println();
-
-		// Test for while loop
-		Queue<Token> whileTest = new LinkedList<>();
-		whileTest.add(new Token("WHILE_KEYWORD", "while"));
-		whileTest.add(new Token("LEFT_PARANTHESIS", "("));
-		whileTest.add(new Token("IDENTIFIER", "y"));
-		whileTest.add(new Token("GREATER_THAN_OPERATOR", ">"));
-		whileTest.add(new Token("INT_LITERAL", "5"));
-		whileTest.add(new Token("RIGHT_PARANTHESIS", ")"));
-		whileTest.add(new Token("LEFT_CURLY_BRACKET", "{"));
-
-		whileTest.add(new Token("LET_KEYWORD", "let"));
-		whileTest.add(new Token("IDENTIFIER", "id"));
-		whileTest.add(new Token("COLON", ":"));
-		whileTest.add(new Token("MUT_KEYWORD", "mut"));
-		whileTest.add(new Token("I32_KEYWORD", "i32"));
-		whileTest.add(new Token("ASSIGNMENT_OPERATOR", "="));
-
-		whileTest.add(new Token("IDENTIFIER", "y"));
-		whileTest.add(new Token("MULTIPLICATION_OPERATOR", "*"));
-		whileTest.add(new Token("LEFT_PARANTHESIS", "("));
-		whileTest.add(new Token("IDENTIFIER", "x"));
-		whileTest.add(new Token("ADDITION_OPERATOR", "+"));
-		whileTest.add(new Token("IDENTIFIER", "y"));
-		whileTest.add(new Token("DIVISION_OPERATOR", "/"));
-		whileTest.add(new Token("IDENTIFIER", "z"));
-
-		whileTest.add(new Token("ADDITION_OPERATOR", "+"));
-		whileTest.add(new Token("IDENTIFIER", "i"));
-		whileTest.add(new Token("RIGHT_PARANTHESIS", ")"));
-		whileTest.add(new Token("SEMICOLON", ";"));
-
-		whileTest.add(new Token("RIGHT_CURLY_BRACKET", "}"));
-
-		// Test for for loop
-		Queue<Token> forTest = new LinkedList<>();
-		forTest.add(new Token("FOR_KEYWORD", "for"));
-		forTest.add(new Token("LEFT_PARANTHESIS", "("));
-		forTest.add(new Token("IDENTIFIER", "y"));
-		forTest.add(new Token("IN_KEYWORD", "in"));
-		forTest.add(new Token("INT_LITERAL", "5"));
-		forTest.add(new Token("INT_LITERAL", "15"));
-		forTest.add(new Token("RIGHT_PARANTHESIS", ")"));
-		forTest.add(new Token("LEFT_CURLY_BRACKET", "{"));
-
-		forTest.add(new Token("LET_KEYWORD", "let"));
-		forTest.add(new Token("IDENTIFIER", "id"));
-		forTest.add(new Token("COLON", ":"));
-		forTest.add(new Token("MUT_KEYWORD", "mut"));
-		forTest.add(new Token("I32_KEYWORD", "i32"));
-		forTest.add(new Token("ASSIGNMENT_OPERATOR", "="));
-
-		forTest.add(new Token("IDENTIFIER", "y"));
-		forTest.add(new Token("MULTIPLICATION_OPERATOR", "*"));
-		forTest.add(new Token("LEFT_PARANTHESIS", "("));
-		forTest.add(new Token("IDENTIFIER", "x"));
-		forTest.add(new Token("ADDITION_OPERATOR", "+"));
-		forTest.add(new Token("IDENTIFIER", "y"));
-		forTest.add(new Token("DIVISION_OPERATOR", "/"));
-		forTest.add(new Token("IDENTIFIER", "z"));
-
-		forTest.add(new Token("ADDITION_OPERATOR", "+"));
-		forTest.add(new Token("IDENTIFIER", "i"));
-		forTest.add(new Token("RIGHT_PARANTHESIS", ")"));
-		forTest.add(new Token("SEMICOLON", ";"));
-
-		forTest.add(new Token("RIGHT_CURLY_BRACKET", "}"));
-
+	
+		// Pass the tokens queue to the parser
 		System.out.println("");
 		System.out.println("/////////////////////////////////////////////");
 		System.out.println("		PARSER");
 		System.out.println("/////////////////////////////////////////////");
 		System.out.println("");
-
-		Parser parser = new Parser(forTest);
+	
+		Parser parser = new Parser(tokensTest); // Use tokensTest from the file
 		parser.parse();
-
+	
 		System.out.println("");
 		System.out.println("/////////////////////////////////////////////");
 		System.out.println("		ATOMS");
 		System.out.println("/////////////////////////////////////////////");
 		System.out.println("");
-
+	
 		while (!atoms.isEmpty()) {
 			System.out.println(atoms.remove());
 		}
-
 	}
-
+	
 }

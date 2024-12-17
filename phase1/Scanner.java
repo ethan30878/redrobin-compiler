@@ -17,9 +17,13 @@ package phase1;
 
 import java.util.*;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.BufferedWriter;
+//import java.io.InputStreamReader;
 import java.io.IOException;
-class Scanner {
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+public class Scanner {
 
         public static void main(String args[]) throws IOException {
 
@@ -34,11 +38,25 @@ class Scanner {
 
                         public void print() {
                                 if (tokenIdentifier.equals("INT_LITERAL") || tokenIdentifier.equals("FLOAT_LITERAL") || tokenIdentifier.equals("IDENTIFIER")) {
-                                        System.out.println(tokenIdentifier + " Data:  " + Data);
+                                        System.out.println(tokenIdentifier + ": " + Data);
                                 } else {
                                         System.out.println(tokenIdentifier);
                                 }
                         }
+			public String toString() {
+				StringBuilder s = new StringBuilder();
+                                if (tokenIdentifier.equals("INT_LITERAL") || tokenIdentifier.equals("FLOAT_LITERAL") || tokenIdentifier.equals("IDENTIFIER")) {
+                                        //System.out.println(tokenIdentifier + " Data:  " + Data);
+					s.append(tokenIdentifier + " Data:  " + Data);
+					s.append("\n");
+				} else {
+					//System.out.println(tokenIdentifier);
+					s.append(tokenIdentifier);
+					s.append("\n");
+				}
+				return s.toString();
+			}
+
                 }
 
                 // Instatiate dictionary and table
@@ -100,6 +118,7 @@ class Scanner {
                 symDictionary.put("0", 50);
                 symDictionary.put(".", 51);
                 symDictionary.put(" ", 52);
+                symDictionary.put("_", 53); 
 
                 // Final State Dictionary
                 finalStates.put(4, "IDENTIFIER");
@@ -142,7 +161,7 @@ class Scanner {
                 finalStates.put(33, "DIVISION_OPERATOR");
                 finalStates.put(34, "MULTIPLICATION_OPERATOR");
                 finalStates.put(35, "SUBTRACTION_OPERATOR");
-                finalStates.put(36, "ADDITON_OPERATOR");
+                finalStates.put(36, "ADDITION_OPERATOR");
 
                 // COMPARISON OPERATORS
                 finalStates.put(43, "LESS_THAN_OPERATOR");
@@ -174,7 +193,7 @@ class Scanner {
                 45, 45, 15, 45, 45, 45, 43, 41, 37, 39,
                 26, 27, 28, 29, 31, 32, 99, 33, 34, 35,
                 36, 50, 50, 50, 50, 50, 50, 50, 50, 50,
-                50, 99, 99 },
+                50, 99, 99, 4 },
                 //from state 1
                 { 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
@@ -202,7 +221,7 @@ class Scanner {
                 45, 45, 45, 45, 45, 45, 99, 99, 99, 99,
                 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                 99, 99, 99, 1, 99, 99, 46, 99, 99, 99,
-                99, 99, 99 },
+                99, 99, 99, 4 },
                 //from state 5
                 { 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
@@ -489,21 +508,21 @@ class Scanner {
                 45, 45, 45, 45, 45, 45, 99, 99, 99, 99,
                 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                 99, 45, 45, 45, 45, 45, 45, 45, 45, 45,
-                45, 99, 99 },
+                45, 99, 99, 45 },
                 //from state 46
                 { 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                 45, 45, 45, 45, 45, 45, 99, 99, 99, 99,
                 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                 99, 45, 45, 45, 47, 45, 45, 45, 45, 45,
-                45, 99, 99 },
+                45, 99, 99, 45 },
                 //from state 47
                 { 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                 45, 45, 45, 45, 45, 45, 99, 99, 99, 99,
                 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
                 99, 45, 45, 45, 45, 45, 45, 45, 45, 45,
-                45, 99, 99 },
+                45, 99, 99, },
                 //from state 48
                 { 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
                 45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
@@ -535,18 +554,19 @@ class Scanner {
 
                 };
 
-                // Printing read in statement
-                System.out.println("Enter a statement: ");
 
                 // Read in statement
                 //String input = System.console().readLine();
 		StringBuilder stringBuilder = new StringBuilder();
-        	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in)); 
+
+		File file = new File(args[0]);
+        	BufferedReader stdin = new BufferedReader(new FileReader(file)); 
 		String line;
 		while ((line = stdin.readLine()) != null && line.length()!= 0) { 
 			stringBuilder.append(line);
 		}
 		String input = stringBuilder.toString();
+
                 // Instantiate index for the transition table
                 int currentState = 0;
 
@@ -576,15 +596,22 @@ class Scanner {
                                         break;
                                 }
 
-                                if (finalStates.get(currentState).equals("INT_LITERAL")|| finalStates.get(currentState).equals("FLOAT_LITERAL")) {
-                                        if (!(currentChar.equals(" ")|| currentChar.equals(";")|| currentChar.equals(")")|| currentChar.equals("(")|| currentChar.equals("{")|| currentChar.equals("}"))) {
-                                                System.out.println("\n Invalid State Detected");
-                                                break;
+                                if (finalStates.get(currentState).equals("INT_LITERAL") || finalStates.get(currentState).equals("FLOAT_LITERAL")) {
+                                        // Check if the current character is NOT a valid delimiter for numbers
+                                        if (!(currentChar.equals(" ") || currentChar.equals(";") || currentChar.equals(")")
+                                              || currentChar.equals("(") || currentChar.equals("{") || currentChar.equals("}")
+                                              || currentChar.equals("+") || currentChar.equals("-") || currentChar.equals("*")
+                                              || currentChar.equals("/") )) {
+                                            System.out.println("\n Invalid State Detected");
+                                            break;
                                         }
                                 }
 
-                                data = input.substring(bookmark, i);
-                                Token toAdd = new Token(finalStates.get(currentState),data);
+                              
+
+                                // With this minimal adjustment:
+                                data = input.substring(bookmark, i).trim(); // Trim the token here
+                                Token toAdd = new Token(finalStates.get(currentState), data);
                                 tokens.add(toAdd);
 
                                 bookmark = i;
@@ -623,8 +650,12 @@ class Scanner {
                 }
 
                 System.out.println();
+		File outFile = new File("scannerOut.txt");
+		BufferedWriter w = new BufferedWriter(new FileWriter(outFile));
                 while (!tokens.isEmpty()) {
-                        tokens.remove().print();
+			w.write(tokens.remove().toString());
                 }
+		w.close();
+
         }
 }
