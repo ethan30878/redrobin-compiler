@@ -876,35 +876,10 @@ public class Compiler {
         }
     }
 
-    // public static ArrayList<String> globalOptomizer(ArrayList<String> oldArray) {
-
-    // ArrayList<String> newArray = new ArrayList<String>();
-
-    // String lastAtom = "";
-
-    // for (String atom : oldArray) {
-
-    // if (!lastAtom.contains("CMP") && atom.contains("JMP")) {
-
-    // newArray.add(atom);
-
-    // return newArray;
-    // }
-
-    // newArray.add(atom);
-
-    // lastAtom = atom;
-
-    // }
-
-    // return newArray;
-    // }
-
     public static ArrayList<String> globalOptimizer(ArrayList<String> oldArray) {
 
         // Instantiate Arrays / Variables
         ArrayList<String> newArray = new ArrayList<String>();
-        ArrayList<String> labels = new ArrayList<String>();
         int deadCodeFlag = 0;
 
         // Loop through atoms
@@ -917,50 +892,20 @@ public class Compiler {
                 deadCodeFlag = 0;
                 newArray.add(atom);
 
-                // Add the label to the labels array
-                String[] splitInput = atom.split(",");
-                labels.add(splitInput[5].substring(0, splitInput[5].length() - 1));
                 continue;
 
             }
 
-            // Check if the atom is a jump
-            if (atom.contains("JMP")) {
+            // Check if the atom is a jump or test
+            if (atom.contains("JMP") || atom.contains("TST")) {
 
-                // Get the label name
-                String[] splitInput = atom.split(",");
-                String labelName = splitInput[5].substring(0, splitInput[5].length() - 1);
-
-                // If the label is in the labels array, add the atom to the return array
-                if (labels.contains(labelName)) {
-
-                    deadCodeFlag = 1;
-                    newArray.add(atom);
-                    continue;
-
-                }
+                deadCodeFlag = 1;
+                newArray.add(atom);
+                continue;
 
             }
 
-            // Check if the atom is a jump
-            if (atom.contains("TST")) {
-
-                // Get the label name
-                String[] splitInput = atom.split(",");
-                String labelName = splitInput[5].substring(0, splitInput[5].length() - 1);
-
-                // If the label is in the labels array, add the atom to the return array
-                if (labels.contains(labelName)) {
-
-                    deadCodeFlag = 1;
-                    newArray.add(atom);
-                    continue;
-
-                }
-
-            }
-
-            // Dead code checker
+            // Dead code checker, if so skip the atom
             if (deadCodeFlag == 1) {
 
                 continue;
