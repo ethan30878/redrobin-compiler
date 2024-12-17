@@ -915,7 +915,6 @@ public class Compiler {
     }
 
     public static void main(String[] args) {
-<<<<<<< HEAD
 	boolean enableOptimizationBackend = true;
         int globalOp = 1;
 	if (args.length > 2) {
@@ -983,16 +982,9 @@ public class Compiler {
 
         System.out.println("Label Table:");
 
-<<<<<<< HEAD
-        //for (List<String> item : labelTable)
-        //    System.out.println(item);
-
-        //System.out.println();
-
-        //System.out.println("Machine Code:");
 	
 	try {
-		File out = new File(args[0]);
+		File out = new File(args[1]);
 		BufferedWriter w = new BufferedWriter(new FileWriter(out));
 	        // Print each string in the list
 	        for (String item : binOut) {
@@ -1018,41 +1010,6 @@ public class Compiler {
 	}catch(IOException e) {
 		e.printStackTrace();
 	}
-=======
-        // for (List<String> item : labelTable)
-        // System.out.println(item);
-
-        // System.out.println();
-
-        // System.out.println("Machine Code:");
-
-        try {
-            File out = new File(args[0]);
-            BufferedWriter w = new BufferedWriter(new FileWriter(out));
-            // Print each string in the list
-            for (String item : binOut) {
-                System.out.println(item);
-            }
-            System.out.println();
-            // Apply optimizations if enabled
-
-            if (enableOptimizationBackend) {
-                peepholeOptimizeLoadStore(); // Another example optimization
-            } else {
-                System.out.println("Skipping backend optimization!");
-            }
-            System.out.println("Machine Code:");
-
-            // Print each string in the list
-            for (String item : binOut) {
-                System.out.println(item);
-                w.write(item);
-                w.write("\n");
-            }
-            w.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
->>>>>>> 3006ebb8eff22c027e05fc400ee6f740cd0c7ce4
+    
     }
 }
