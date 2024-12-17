@@ -20,7 +20,6 @@ public class Compiler {
     public static List<List<String>> labelTable = new ArrayList<>();
     public static List<String> binOut = new ArrayList<>();
 
-
     /**
      * Author: Jee McCloud
      * 
@@ -56,7 +55,7 @@ public class Compiler {
         // }
         // }
 
-        return "CLR -> " + opcode + "/" + cmp + "/" + reg + "/" + "00000000000000000000";
+        return opcode + cmp + reg + "00000000000000000000";
     }
 
     /**
@@ -201,7 +200,7 @@ public class Compiler {
             labelTable.add(addresses);
         }
 
-        return "ADD -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+        return opcode + cmp + pad(reg, 4)
                 + pad(decimalToBinary(Integer.parseInt(mem2)), 20);
     }
 
@@ -310,7 +309,7 @@ public class Compiler {
             labelTable.add(addresses);
         }
 
-        return "SUB -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+        return opcode + cmp + pad(reg, 4)
                 + pad(decimalToBinary(Integer.parseInt(mem2)), 20);
     }
 
@@ -420,7 +419,7 @@ public class Compiler {
             labelTable.add(addresses);
         }
 
-        return "MUL -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+        return opcode + cmp + pad(reg, 4)
                 + pad(decimalToBinary(Integer.parseInt(mem2)), 20);
     }
 
@@ -529,7 +528,7 @@ public class Compiler {
             labelTable.add(addresses);
         }
 
-        return "DIV -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+        return opcode + cmp + pad(reg, 4)
                 + pad(decimalToBinary(Integer.parseInt(mem2)), 20);
     }
 
@@ -569,7 +568,7 @@ public class Compiler {
 
         // return "JMP -> " + opcode + "/" + cmp + "/" +
         // decimalToBinary(Integer.parseInt(reg)) + "/" + mem;
-        return "JMP -> " + opcode + "/" + cmp + "/0000/" + pad(decimalToBinary(Integer.parseInt(mem)), 20);
+        return opcode + cmp + pad(decimalToBinary(Integer.parseInt(mem)), 20);
     }
 
     /**
@@ -615,7 +614,7 @@ public class Compiler {
         }
 
         // Assuming we're following the register + memory address format
-        binOut.add("CMP -> " + opcode + "/" + cmp + "/" + pad(decimalToBinary(Integer.parseInt(reg1)), 4) + "/"
+        binOut.add(opcode + cmp + pad(decimalToBinary(Integer.parseInt(reg1)), 4)
                 + pad(mem2, 20));
         return cmp;
     }
@@ -634,7 +633,7 @@ public class Compiler {
         fpreg += 1;
         String reg = decimalToBinary(fpreg);
 
-        binOut.add("LOD -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+        binOut.add(opcode + cmp + pad(reg, 4)
                 + pad((decimalToBinary(Integer.parseInt(mem))), 20));
 
         return reg;
@@ -653,7 +652,7 @@ public class Compiler {
         fpreg += 1;
         String reg = decimalToBinary(fpreg);
 
-        binOut.add("STO -> " + opcode + "/" + cmp + "/" + pad(reg, 4) + "/"
+        binOut.add(opcode + cmp + pad(reg, 4)
                 + pad(decimalToBinary(Integer.parseInt(mem)), 20));
 
     }
@@ -700,8 +699,8 @@ public class Compiler {
         stoConv(String.valueOf(lblAdress));
 
         // Generate CMP instruction
-        String cmpInstruction = "CMP -> " + opcodeCmp + "/" + cmp + "/"
-                + pad(decimalToBinary(Integer.parseInt(memVar)), 4) + "/" + pad(decimalToBinary(lblAdress), 20);
+        String cmpInstruction = opcodeCmp + cmp
+                + pad(decimalToBinary(Integer.parseInt(memVar)), 4) + pad(decimalToBinary(lblAdress), 20);
 
         // Generate JMP instruction based on label
         String memLabel = "";
@@ -711,7 +710,7 @@ public class Compiler {
             }
         }
 
-        String jmpInstruction = "JMP -> " + opcodeJmp + "/0000/0000/"
+        String jmpInstruction = opcodeJmp + "00000000"
                 + pad(decimalToBinary(Integer.parseInt(memLabel)), 20);
 
         return cmpInstruction + "\n" + jmpInstruction;
@@ -724,48 +723,49 @@ public class Compiler {
      * go to the same address.
      */
     /**
- * Optimizes the generated machine code by removing redundant LOD and STO instructions.
- */
-public static void peepholeOptimizeLoadStore() {
-    List<String> optimizedBinOut = new ArrayList<>();
-    String lastStoreMem = null; // Last STO memory location
-    String lastLoadReg = null;  // Last loaded register
-    String lastLoadMem = null;  // Last loaded memory location
+     * Optimizes the generated machine code by removing redundant LOD and STO
+     * instructions.
+     */
+    public static void peepholeOptimizeLoadStore() {
+        List<String> optimizedBinOut = new ArrayList<>();
+        String lastStoreMem = null; // Last STO memory location
+        String lastLoadReg = null; // Last loaded register
+        String lastLoadMem = null; // Last loaded memory location
 
-    for (String instr : binOut) {
-        if (instr.startsWith("STO ->")) {
-            String[] parts = instr.split("/");
-            String storeReg = parts[2].trim();
-            String storeMem = parts[3].trim();
+        for (String instr : binOut) {
+            if (instr.startsWith("STO ->")) {
+                String[] parts = instr.split("/");
+                String storeReg = parts[2].trim();
+                String storeMem = parts[3].trim();
 
-            // If the value was already stored in the same memory location, skip this STO
-            if (lastStoreMem != null && lastStoreMem.equals(storeMem) && lastLoadReg.equals(storeReg)) {
-                continue; // Redundant STO
+                // If the value was already stored in the same memory location, skip this STO
+                if (lastStoreMem != null && lastStoreMem.equals(storeMem) && lastLoadReg.equals(storeReg)) {
+                    continue; // Redundant STO
+                }
+
+                // Update lastStoreMem and add STO to optimized output
+                lastStoreMem = storeMem;
+                optimizedBinOut.add(instr);
+            } else if (instr.startsWith("LOD ->")) {
+                String[] parts = instr.split("/");
+                String loadReg = parts[2].trim();
+                String loadMem = parts[3].trim();
+
+                // If the value in memory has not changed, skip this redundant LOD
+                if (lastStoreMem != null && lastStoreMem.equals(loadMem)) {
+                    continue; // Redundant LOD
+                }
+
+                // Update lastLoadMem and lastLoadReg
+                lastLoadMem = loadMem;
+                lastLoadReg = loadReg;
+                optimizedBinOut.add(instr);
+            } else {
+                // Reset tracking for STO/LOD optimizations on any other instruction
+                lastStoreMem = null;
+                optimizedBinOut.add(instr);
             }
-
-            // Update lastStoreMem and add STO to optimized output
-            lastStoreMem = storeMem;
-            optimizedBinOut.add(instr);
-        } else if (instr.startsWith("LOD ->")) {
-            String[] parts = instr.split("/");
-            String loadReg = parts[2].trim();
-            String loadMem = parts[3].trim();
-
-            // If the value in memory has not changed, skip this redundant LOD
-            if (lastStoreMem != null && lastStoreMem.equals(loadMem)) {
-                continue; // Redundant LOD
-            }
-
-            // Update lastLoadMem and lastLoadReg
-            lastLoadMem = loadMem;
-            lastLoadReg = loadReg;
-            optimizedBinOut.add(instr);
-        } else {
-            // Reset tracking for STO/LOD optimizations on any other instruction
-            lastStoreMem = null;
-            optimizedBinOut.add(instr);
         }
-    }
 
         binOut = optimizedBinOut;
     }
@@ -917,12 +917,12 @@ public static void peepholeOptimizeLoadStore() {
     }
 
     public static void main(String[] args) {
-	boolean enableOptimizationBackend;
-	if (args.length > 1) {
-		enableOptimizationBackend = false;
-	} else{
-		enableOptimizationBackend = true;
-	}
+        boolean enableOptimizationBackend;
+        if (args.length > 1) {
+            enableOptimizationBackend = false;
+        } else {
+            enableOptimizationBackend = true;
+        }
         // Test to read in txt file
         String filename = "phase3/test.txt";
         String[] fileLines = readFileToArray(filename);
@@ -966,7 +966,6 @@ public static void peepholeOptimizeLoadStore() {
             }
         }
 
-
         System.out.println("Fixup Table:");
 
         for (List<String> item : fixupTable)
@@ -976,39 +975,39 @@ public static void peepholeOptimizeLoadStore() {
 
         System.out.println("Label Table:");
 
-        //for (List<String> item : labelTable)
-        //    System.out.println(item);
+        // for (List<String> item : labelTable)
+        // System.out.println(item);
 
-        //System.out.println();
+        // System.out.println();
 
-        //System.out.println("Machine Code:");
-	
-	try {
-		File out = new File(args[0]);
-		BufferedWriter w = new BufferedWriter(new FileWriter(out));
-	        // Print each string in the list
-	        for (String item : binOut) {
-	            System.out.println(item);
-	        }
-	        System.out.println();
-	        // Apply optimizations if enabled
-	
-	        if (enableOptimizationBackend) {
-	            optimizeLoadStore(); // Another example optimization
-	        } else {
-			System.out.println("Skipping backend optimization!");
-		}
-	        System.out.println("Machine Code:");
-	
-	        // Print each string in the list
-	        for (String item : binOut) {
-	            System.out.println(item);
-		    w.write(item);
-		    w.write("\n");
-	        }
-		w.close();	
-	}catch(IOException e) {
-		e.printStackTrace();
-	}
+        // System.out.println("Machine Code:");
+
+        try {
+            File out = new File(args[0]);
+            BufferedWriter w = new BufferedWriter(new FileWriter(out));
+            // Print each string in the list
+            for (String item : binOut) {
+                System.out.println(item);
+            }
+            System.out.println();
+            // Apply optimizations if enabled
+
+            if (enableOptimizationBackend) {
+                peepholeOptimizeLoadStore(); // Another example optimization
+            } else {
+                System.out.println("Skipping backend optimization!");
+            }
+            System.out.println("Machine Code:");
+
+            // Print each string in the list
+            for (String item : binOut) {
+                System.out.println(item);
+                w.write(item);
+                w.write("\n");
+            }
+            w.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
