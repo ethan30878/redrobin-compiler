@@ -1,0 +1,4 @@
+a = a + b - c;
+while ( y >= 5 ) {
+   let x = 5 ;
+}

@@ -66,31 +66,61 @@ public class Compiler {
      */
     public static void movConv(String input) {
 
+        String mem1 = "";
+        String reg = "";
+
         String[] splitInput = input.split(",");
 
         String src = splitInput[1].trim();
 
         String des = splitInput[3].substring(0, splitInput[3].length() - 1);
 
-        // Find the address for source(s)
+        // // Find the address for source(s)
+        // for (List<String> row : labelTable) {
+        // if (row.get(0).equals(src)) {
+
+        // src = row.get(2);
+
+        // }
+        // }
+
+        // String destAddress = "";
+        // for (List<String> row : labelTable) {
+        // if (row.get(0).equals(des)) {
+
+        // destAddress = row.get(2);
+
+        // }
+        // }
+
         for (List<String> row : labelTable) {
-            if (row.get(0).equals(src)) {
+            if (row.get(0).equals(splitInput[1])) {
 
-                src = row.get(2);
-
+                mem1 = row.get(2);
             }
         }
 
-        String destAddress = "";
-        for (List<String> row : labelTable) {
-            if (row.get(0).equals(des)) {
+        if (mem1.equals("")) {
 
-                destAddress = row.get(2);
+            // Get the label name and address
+            String labelName = splitInput[1];
+            String addr = String.valueOf(lblAdress + 100);
+            String value = splitInput[1];
+            lblAdress += 4;
 
-            }
+            // Add into the array
+            List<String> addresses = new ArrayList<>();
+            addresses.add(labelName);
+            addresses.add(value);
+            addresses.add(addr);
+
+            labelTable.add(addresses);
+
+            mem1 = addr;
         }
-        lodConv(src);
-        stoConv(destAddress);
+
+        reg = lodConv(mem1);
+        stoConv(reg);
 
     }
 
@@ -173,6 +203,25 @@ public class Compiler {
                     mem2 = row.get(2);
                 }
             }
+        }
+
+        if (mem2.equals("")) {
+
+            // Get the label name and address
+            String labelName = splitInput[2];
+            String addr = String.valueOf(lblAdress + 100);
+            String value = splitInput[2];
+            lblAdress += 4;
+
+            // Add into the array
+            List<String> addresses = new ArrayList<>();
+            addresses.add(labelName);
+            addresses.add(value);
+            addresses.add(addr);
+
+            labelTable.add(addresses);
+
+            mem2 = addr;
         }
 
         // Make sure storage location is in the table
@@ -282,6 +331,25 @@ public class Compiler {
                     mem2 = row.get(2);
                 }
             }
+        }
+
+        if (mem2.equals("")) {
+
+            // Get the label name and address
+            String labelName = splitInput[2];
+            String addr = String.valueOf(lblAdress + 100);
+            String value = splitInput[2];
+            lblAdress += 4;
+
+            // Add into the array
+            List<String> addresses = new ArrayList<>();
+            addresses.add(labelName);
+            addresses.add(value);
+            addresses.add(addr);
+
+            labelTable.add(addresses);
+
+            mem2 = addr;
         }
 
         // Make sure storage location is in the table
@@ -394,6 +462,25 @@ public class Compiler {
             }
         }
 
+        if (mem2.equals("")) {
+
+            // Get the label name and address
+            String labelName = splitInput[2];
+            String addr = String.valueOf(lblAdress + 100);
+            String value = splitInput[2];
+            lblAdress += 4;
+
+            // Add into the array
+            List<String> addresses = new ArrayList<>();
+            addresses.add(labelName);
+            addresses.add(value);
+            addresses.add(addr);
+
+            labelTable.add(addresses);
+
+            mem2 = addr;
+        }
+
         // Make sure storage location is in the table
         String mem3 = "";
         for (List<String> row : labelTable) {
@@ -501,6 +588,25 @@ public class Compiler {
                     mem2 = row.get(2);
                 }
             }
+        }
+
+        if (mem2.equals("")) {
+
+            // Get the label name and address
+            String labelName = splitInput[2];
+            String addr = String.valueOf(lblAdress + 100);
+            String value = splitInput[2];
+            lblAdress += 4;
+
+            // Add into the array
+            List<String> addresses = new ArrayList<>();
+            addresses.add(labelName);
+            addresses.add(value);
+            addresses.add(addr);
+
+            labelTable.add(addresses);
+
+            mem2 = addr;
         }
 
         // Make sure storage location is in the table
@@ -685,6 +791,25 @@ public class Compiler {
             if (row.get(0).equals(var)) {
                 memVar = row.get(2);
             }
+        }
+
+        if (memVar.equals("")) {
+
+            // Get the label name and address
+            String labelName = splitInput[2];
+            String addr = String.valueOf(lblAdress + 100);
+            String value2 = splitInput[2];
+            lblAdress += 4;
+
+            // Add into the array
+            List<String> addresses = new ArrayList<>();
+            addresses.add(labelName);
+            addresses.add(value2);
+            addresses.add(addr);
+
+            labelTable.add(addresses);
+
+            memVar = addr;
         }
 
         // Store the comparison value in memory
@@ -915,25 +1040,22 @@ public class Compiler {
     }
 
     public static void main(String[] args) {
-	boolean enableOptimizationBackend = true;
+        boolean enableOptimizationBackend = true;
         int globalOp = 1;
-	if (args.length > 2) {
-		for(int i=2; i < args.length; i++) {
-			if(args[i].equals("-nf")) {
-
-				globalOp = 0;
-			}
-			else if (args[i].equals("-nb")) {
-				enableOptimizationBackend = false;
-			}
-		}
-	}
+        if (args.length > 2) {
+            for (int i = 2; i < args.length; i++) {
+                if (args[i].equals("-nf")) {
+                    globalOp = 0;
+                } else if (args[i].equals("-nb")) {
+                    enableOptimizationBackend = false;
+                }
+            }
+        }
 
         // Test to read in txt file
-        String filename = "phase3/test.txt";
+        String filename = "atoms.txt";
         String[] fileLines = readFileToArray(filename);
         ArrayList<String> atoms = new ArrayList<String>();
-
 
         for (String line : fileLines) {
             atoms.add(line);
@@ -942,13 +1064,11 @@ public class Compiler {
         if (globalOp == 1) {
             atoms = globalOptimizer(atoms);
         } else {
-		System.out.println("Skipping Frontend Optimization!");
-	}
+            System.out.println("Skipping Frontend Optimization!");
+        }
 
         // Create something to store labels and variables
         createFixupTable(atoms);
-
-        System.out.println("Atoms: \n" + atoms);
 
         for (String atom : atoms) {
 
@@ -965,7 +1085,7 @@ public class Compiler {
             } else if (atom.substring(1, 4).equals("CMP")) {
                 binOut.add(cmpConv(atom));
             } else if (atom.substring(1, 4).equals("MOV")) {
-                // movConv(atom);
+                movConv(atom);
             } else if (atom.substring(1, 4).equals("LBL")) {
                 // lblConv(atom);
             } else if (atom.substring(1, 4).equals("TST")) {
@@ -982,34 +1102,33 @@ public class Compiler {
 
         System.out.println("Label Table:");
 
-	
-	try {
-		File out = new File(args[1]);
-		BufferedWriter w = new BufferedWriter(new FileWriter(out));
-	        // Print each string in the list
-	        for (String item : binOut) {
-	            System.out.println(item);
-	        }
-	        System.out.println();
-	        // Apply optimizations if enabled
-	
-	        if (enableOptimizationBackend) {
-	            peepholeOptimizeLoadStore(); // Another example optimization
-	        } else {
-			System.out.println("Skipping backend optimization!");
-		}
-	        System.out.println("Machine Code:");
-	
-	        // Print each string in the list
-	        for (String item : binOut) {
-	            System.out.println(item);
-		    w.write(item);
-		    w.write("\n");
-	        }
-		w.close();	
-	}catch(IOException e) {
-		e.printStackTrace();
-	}
-    
+        try {
+            File out = new File(args[1]);
+            BufferedWriter w = new BufferedWriter(new FileWriter(out));
+            // Print each string in the list
+            for (List<String> item : labelTable) {
+                System.out.println(item);
+            }
+            System.out.println();
+            // Apply optimizations if enabled
+
+            if (enableOptimizationBackend) {
+                peepholeOptimizeLoadStore(); // Another example optimization
+            } else {
+                System.out.println("Skipping backend optimization!");
+            }
+            System.out.println("Machine Code:");
+
+            // Print each string in the list
+            for (String item : binOut) {
+                System.out.println(item);
+                w.write(item);
+                w.write("\n");
+            }
+            w.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

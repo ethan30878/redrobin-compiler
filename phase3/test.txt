@@ -1,7 +1,0 @@
-(MOV,5,,a)
-(MOV,5,,b)
-(MOV,1,,c)
-(MOV,a,,T1)
-(ADD,T1,b,T2)
-(SUB,T2,c,T3)
-(MOV,T3,,a)
