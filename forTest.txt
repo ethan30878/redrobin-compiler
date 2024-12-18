@@ -1,0 +1,4 @@
+a = a + b - c;
+for ( y in 5 15) {
+   let x = 5 ;
+}
