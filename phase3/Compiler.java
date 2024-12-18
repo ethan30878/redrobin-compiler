@@ -2,11 +2,16 @@ package phase3;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -14,8 +19,8 @@ import java.util.Stack;
 public class Compiler {
 
     // Variables for the compiler
-    public static int fpreg = 0;
-    public static int lblAdress = 100;
+    public static int fpreg = 2;
+    public static int lblAdress = 0;
     public static List<List<String>> fixupTable = new ArrayList<>();
     public static List<List<String>> labelTable = new ArrayList<>();
     public static List<String> binOut = new ArrayList<>();
@@ -43,6 +48,10 @@ public class Compiler {
     public static String clrConv(String reg) {
         String opcode = "0101";
         String cmp = "0000";
+
+        if (reg == "") {
+            reg = "0000";
+        }
 
         // String[] splitInput = input.split(",");
         // String reg = splitInput[5].substring(0, splitInput[5].length() - 1);
@@ -119,8 +128,9 @@ public class Compiler {
             mem1 = addr;
         }
 
-        reg = lodConv(mem1);
-        stoConv(reg);
+        // TODO: Modified this but idk
+        stoConv(mem1);
+        reg = lodConv(String.valueOf(lblAdress + 96));
 
     }
 
@@ -157,7 +167,7 @@ public class Compiler {
 
             stoConv(String.valueOf(stoAddress));
 
-            reg = lodConv(String.valueOf(stoAddress));
+            reg = lodConv(String.valueOf(stoAddress - 4));
 
         } catch (NumberFormatException e) {
 
@@ -286,7 +296,7 @@ public class Compiler {
 
             stoConv(String.valueOf(stoAddress));
 
-            reg = lodConv(String.valueOf(stoAddress));
+            reg = lodConv(String.valueOf(stoAddress - 4));
 
         } catch (NumberFormatException e) {
             // Find the address
@@ -413,7 +423,7 @@ public class Compiler {
 
             stoConv(String.valueOf(stoAddress));
 
-            reg = lodConv(String.valueOf(stoAddress));
+            reg = lodConv(String.valueOf(stoAddress - 4));
 
         } catch (NumberFormatException e) {
 
@@ -542,7 +552,7 @@ public class Compiler {
 
             stoConv(String.valueOf(stoAddress));
 
-            reg = lodConv(String.valueOf(stoAddress));
+            reg = lodConv(String.valueOf(stoAddress - 4));
 
         } catch (NumberFormatException e) {
 
@@ -739,6 +749,8 @@ public class Compiler {
         fpreg += 1;
         String reg = decimalToBinary(fpreg);
 
+        System.out.println(reg);
+
         binOut.add(opcode + cmp + pad(reg, 4)
                 + pad((decimalToBinary(Integer.parseInt(mem))), 20));
 
@@ -775,9 +787,12 @@ public class Compiler {
      * @param input The atom string
      * @return Machine code for TST
      */
-    public static String tstConv(String input) {
+    public static void tstConv(String input) {
         String opcodeCmp = "0110"; // CMP opcode
         String opcodeJmp = "0101"; // JMP opcode
+
+        // System.out.println("CMP OP: " + input.split(",")[4]);
+
         String cmp = pad(decimalToBinary(Integer.parseInt(input.split(",")[4])), 4); // Flag for CMP
         String[] splitInput = input.split(",");
 
@@ -817,15 +832,19 @@ public class Compiler {
         List<String> newLabel = new ArrayList<>();
         newLabel.add(value);
         newLabel.add(value);
-        newLabel.add(String.valueOf(lblAdress));
+        newLabel.add(String.valueOf(lblAdress + 100));
         labelTable.add(newLabel);
 
         // store the value we are comparing to, generate sto instruction
-        stoConv(String.valueOf(lblAdress));
+        stoConv(String.valueOf(lblAdress + 100));
 
         // Generate CMP instruction
-        String cmpInstruction = opcodeCmp + cmp
-                + pad(decimalToBinary(Integer.parseInt(memVar)), 4) + pad(decimalToBinary(lblAdress), 20);
+        // String cmpInstruction = opcodeCmp + cmp
+        // + pad(decimalToBinary(Integer.parseInt(memVar)), 4) +
+        // pad(decimalToBinary(lblAdress), 20);
+
+        String cmpInstruction = opcodeCmp + cmp +
+                "0000" + pad(decimalToBinary(lblAdress), 20);
 
         // Generate JMP instruction based on label
         String memLabel = "";
@@ -838,7 +857,9 @@ public class Compiler {
         String jmpInstruction = opcodeJmp + "00000000"
                 + pad(decimalToBinary(Integer.parseInt(memLabel)), 20);
 
-        return cmpInstruction + "\n" + jmpInstruction;
+        binOut.add(cmpInstruction);
+        binOut.add(jmpInstruction);
+
     }
 
     /**
@@ -1089,7 +1110,7 @@ public class Compiler {
             } else if (atom.substring(1, 4).equals("LBL")) {
                 // lblConv(atom);
             } else if (atom.substring(1, 4).equals("TST")) {
-                binOut.add(tstConv(atom));
+                tstConv(atom);
             }
         }
 
@@ -1119,13 +1140,23 @@ public class Compiler {
             }
             System.out.println("Machine Code:");
 
+            Path path = Paths.get("output.bin");
+            var writer = new DataOutputStream(Files.newOutputStream(path));
+
+            // First Instruction for MiniVM
+            writer.writeInt(1);
+
             // Print each string in the list
             for (String item : binOut) {
                 System.out.println(item);
-                w.write(item);
-                w.write("\n");
+                var intCoverter = new BigInteger(item, 2).intValue();
+                writer.writeInt(intCoverter);
             }
-            w.close();
+
+            // HLT Instruction for MiniVM
+            writer.writeInt(new BigInteger("10010000000000000000000000000000", 2).intValue());
+
+            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

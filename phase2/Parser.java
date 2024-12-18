@@ -418,17 +418,17 @@ public class Parser {
 			System.out.println("Matched: " + currentToken.tokenIdentifier + " --> " + currentToken.data);
 
 			if (currentToken.tokenIdentifier.equals("IS_EQUAL_OPERATOR")) {
-				operator = "6";
-			} else if (currentToken.tokenIdentifier.equals("NOT_EQUAL_OPERATOR")) {
 				operator = "1";
+			} else if (currentToken.tokenIdentifier.equals("NOT_EQUAL_OPERATOR")) {
+				operator = "6";
 			} else if (currentToken.tokenIdentifier.equals("LESS_THAN_OPERATOR")) {
-				operator = "5";
-			} else if (currentToken.tokenIdentifier.equals("GREATER_THAN_OPERATOR")) {
-				operator = "4";
-			} else if (currentToken.tokenIdentifier.equals("LESS_THAN_OR_EQUAL_OPERATOR")) {
-				operator = "3";
-			} else {
 				operator = "2";
+			} else if (currentToken.tokenIdentifier.equals("GREATER_THAN_OPERATOR")) {
+				operator = "3";
+			} else if (currentToken.tokenIdentifier.equals("LESS_THAN_OR_EQUAL_OPERATOR")) {
+				operator = "4";
+			} else {
+				operator = "5";
 			}
 
 			advance();
