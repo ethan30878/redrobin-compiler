@@ -674,7 +674,7 @@ public class Compiler {
 
         // return "JMP -> " + opcode + "/" + cmp + "/" +
         // decimalToBinary(Integer.parseInt(reg)) + "/" + mem;
-        return opcode + cmp + pad(decimalToBinary(Integer.parseInt(mem)), 20);
+        return opcode + cmp + "0000" + pad(decimalToBinary(Integer.parseInt(mem)), 20);
     }
 
     /**
