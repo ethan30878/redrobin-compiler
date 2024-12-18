@@ -841,58 +841,99 @@ public class Compiler {
         return cmpInstruction + "\n" + jmpInstruction;
     }
 
-    /**
-     * Author: Alejandro Santiago & Ethan Glenn
-     * IN PROGRESS
-     * looks at the binout and checks locations of lod and sto to remove when they
-     * go to the same address.
+    
+
+
+     /* Validates that the instruction is a 32-bit binary string.
      */
+    private static boolean isValidBinary(String instr) {
+        return instr.matches("[01]{32}");
+    }
+    
     /**
-     * Optimizes the generated machine code by removing redundant LOD and STO
-     * instructions.
+     * Extracts the opcode from a 32-bit instruction.
      */
+    public static String getOpcode(String instr) {
+        return instr.substring(0, 4);
+    }
+    
+    /**
+     * Extracts the register from a 32-bit instruction.
+     */
+    public static String getRegister(String instr) {
+        return instr.substring(8, 12);
+    }
+    
+    /**
+     * Extracts the memory address from a 32-bit instruction.
+     */
+    public static String getMemoryAddress(String instr) {
+        return instr.substring(12, 32);
+    }
+    /**
+    * Author: Alejandro Santiago & Ethan Glenn
+    * looks at the binout and checks locations of lod and sto to remove when they
+    * go to the same address. based on book example
+    **/
     public static void peepholeOptimizeLoadStore() {
         List<String> optimizedBinOut = new ArrayList<>();
-        String lastStoreMem = null; // Last STO memory location
-        String lastLoadReg = null; // Last loaded register
-        String lastLoadMem = null; // Last loaded memory location
-
+        String lastSTORegister = "";
+        String lastSTOAddress = "";
+    
         for (String instr : binOut) {
-            if (instr.startsWith("1000")) {
-                String storeReg = instr.substring(8, 11);
-                String storeMem = instr.substring(12, 31);
-
-                // If the value was already stored in the same memory location, skip this STO
-                if (lastStoreMem != null && lastStoreMem.equals(storeMem) && lastLoadReg.equals(storeReg)) {
-                    continue; // Redundant STO
-                }
-
-                // Update lastStoreMem and add STO to optimized output
-                lastStoreMem = storeMem;
+            // Validate instruction length and binary format
+            if (instr.length() != 32 || !isValidBinary(instr)) {
+                // Invalid instruction; add it as-is
                 optimizedBinOut.add(instr);
-            } else if (instr.startsWith("0111")) {
-                String loadReg = instr.substring(8, 11);
-                String loadMem = instr.substring(12, 31);
-
-                // If the value in memory has not changed, skip this redundant LOD
-                if (lastStoreMem != null && lastStoreMem.equals(loadMem)) {
-                    continue; // Redundant LOD
-                }
-
-                // Update lastLoadMem and lastLoadReg
-                lastLoadMem = loadMem;
-                lastLoadReg = loadReg;
-                optimizedBinOut.add(instr);
-            } else {
-                // Reset tracking for STO/LOD optimizations on any other instruction
-                lastStoreMem = null;
+                continue;
+            }
+        
+            String opcode = getOpcode(instr);
+            String reg = getRegister(instr);
+            String mem = getMemoryAddress(instr);
+        
+            if (opcode.equals("1000")) { // STO
+                // Update last STO information
+                lastSTORegister = reg;
+                lastSTOAddress = mem;
+            
                 optimizedBinOut.add(instr);
             }
+            else if (opcode.equals("0111")) { // LOD
+                // Check if this LOD is redundant (same register and address as last STO)
+                if (reg.equals(lastSTORegister) && mem.equals(lastSTOAddress)) {
+                    // Redundant LOD; remove the last STO by not adding it to optimizedBinOut
+                    // Remove the last STO from optimizedBinOut
+                    if (!optimizedBinOut.isEmpty()) {
+                        String lastInstr = optimizedBinOut.get(optimizedBinOut.size() - 1);
+                        String lastOpcode = getOpcode(lastInstr);
+                        String lastReg = getRegister(lastInstr);
+                        String lastMem = getMemoryAddress(lastInstr);
+                        if (lastOpcode.equals("1000") && lastReg.equals(reg) && lastMem.equals(mem)) {
+                            optimizedBinOut.remove(optimizedBinOut.size() - 1);
+                            // Skip adding this LOD as well
+                            lastSTORegister = "";
+                            lastSTOAddress = "";
+                            continue;
+                        }
+                    }
+                }
+                // If not redundant, add the LOD
+                optimizedBinOut.add(instr);
+            }
+            else {
+                // Any other instruction, add as-is and reset STO tracking
+                optimizedBinOut.add(instr);
+                lastSTORegister = "";
+                lastSTOAddress = "";
+            }
         }
-
+    
+        // Replace the original binOut with the optimized version
         binOut = optimizedBinOut;
     }
 
+    
     static String decimalToBinary(int num) {
 
         Stack<Integer> st = new Stack<>();
